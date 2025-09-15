@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PACS Utai – Snapshot</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
-<!-- FIX: your file is style.css (not styles.css) -->
-<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="style.css"/><!-- was styles.css -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
 </head>
 <body class="app-only app-locked">
@@ -16,7 +15,7 @@
     <div class="hd">
       <div style="display:flex;align-items:center;gap:10px">
         <div class="logo" aria-hidden="true" style="background:#fff">
-          <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="" loading="lazy" width="40" height="40" referrerpolicy="no-referrer"/>
+          <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="" width="40" height="40" referrerpolicy="no-referrer"/>
         </div>
         <div>
           <div class="ttl" style="color:#145a2a">PACS Utai — Sign in</div>
@@ -44,11 +43,12 @@
   </div>
 </div>
 
+<!-- APP -->
 <div class="app-only">
   <div class="appbar">
     <div class="row">
       <a class="logo" href="index.html" aria-label="NABARD">
-        <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="NABARD logo" loading="lazy" width="40" height="40" referrerpolicy="no-referrer"/>
+        <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="NABARD logo" width="40" height="40" referrerpolicy="no-referrer"/>
       </a>
       <div>
         <div class="ttl">PACS Utai – Executive Snapshot & Drill-downs</div>
@@ -65,17 +65,15 @@
       <a class="tab" href="reporting.html">Reporting</a>
     </div>
   </div>
+
   <div style="padding:8px 12px">
     <button class="tab" onclick="logout()">Logout</button>
   </div>
 
-  <!-- ===== SNAPSHOT (5 rows like original) ===== -->
+  <!-- SNAPSHOT (ALL 5 ROWS) -->
   <section class="wrap" id="snapshot">
-
-    <!-- Row 1: PACS profile -->
-    <div class="rowhead dbl" data-href="pacs.html">
-      ① PACS profile <span class="chip">Double-click for charts / details</span>
-    </div>
+    <!-- Row 1 -->
+    <div class="rowhead dbl" data-page="pacs.html">① PACS profile <span class="chip">Double-click for charts / details</span></div>
     <div class="cards">
       <div class="kcard span-3"><div class="ic t">🗺️</div><div class="kv"><div class="label">Villages covered</div><div class="value">5</div></div></div>
       <div class="kcard span-3"><div class="ic b">🌍</div><div class="kv"><div class="label">Total land holding</div><div class="value">7,150 acres</div></div></div>
@@ -87,10 +85,8 @@
       <div class="kcard span-3"><div class="ic b">🌾</div><div class="kv"><div class="label">Crop focus</div><div class="value">Wheat</div><div class="mini">Second priority</div></div></div>
     </div>
 
-    <!-- Row 2: Membership -->
-    <div class="rowhead dbl" data-href="membership.html">
-      ② Members profile <span class="chip">Double-click for charts</span>
-    </div>
+    <!-- Row 2 -->
+    <div class="rowhead dbl" data-page="membership.html">② Members profile <span class="chip">Double-click for charts</span></div>
     <div class="cards">
       <div class="kcard span-3"><div class="ic g">👥</div><div class="kv"><div class="label">Total members</div><div class="value" id="ss_total">2,316</div></div></div>
       <div class="kcard span-3"><div class="ic b">💳</div><div class="kv"><div class="label">Borrowing</div><div class="value" id="ss_bor">2,050</div><div class="mini">Taking loans</div></div></div>
@@ -110,10 +106,8 @@
       </div>
     </div>
 
-    <!-- Row 3: Loan profile -->
-    <div class="rowhead dbl" data-href="loan.html">
-      ③ Loan profile <span class="chip">Double-click for charts</span>
-    </div>
+    <!-- Row 3 -->
+    <div class="rowhead dbl" data-page="loan.html">③ Loan profile <span class="chip">Double-click for charts</span></div>
     <div class="cards">
       <div class="kcard span-3"><div class="ic g">💰</div><div class="kv"><div class="label">Total outstanding</div><div class="value">₹1.2 Cr</div><div class="mini">FY 2024–25</div></div></div>
       <div class="kcard span-3"><div class="ic b">🧾</div><div class="kv"><div class="label">Avg KCC</div><div class="value">96%</div><div class="mini">Coverage across members</div></div></div>
@@ -121,10 +115,8 @@
       <div class="kcard span-3"><div class="ic a">⛔</div><div class="kv"><div class="label">Members in DPD</div><div class="value">&gt;30: 84 | &gt;60: 42 | &gt;90: 18</div><div class="mini" style="color:var(--danger)">Focus on &gt;90</div></div></div>
     </div>
 
-    <!-- Row 4: Non-credit -->
-    <div class="rowhead dbl" data-href="noncredit.html">
-      ④ Non-credit activities <span class="chip">Double-click for details</span>
-    </div>
+    <!-- Row 4 -->
+    <div class="rowhead dbl" data-page="noncredit.html">④ Non-credit activities <span class="chip">Double-click for details</span></div>
     <div class="cards">
       <div class="kcard span-3"><div class="ic g">🧪</div><div class="kv"><div class="label">Fertilisers – sales</div><div class="value">₹1.05 Cr</div></div></div>
       <div class="kcard span-3"><div class="ic b">🧴</div><div class="kv"><div class="label">Pesticides – sales</div><div class="value">₹0.18 Cr</div></div></div>
@@ -134,39 +126,45 @@
       <div class="kcard span-3"><div class="ic b">⭐</div><div class="kv"><div class="label">Diversification score</div><div class="value">72 / 100</div><div class="mini">Higher is better</div></div></div>
     </div>
 
-    <!-- Row 5: Reporting -->
-    <div class="rowhead dbl" data-href="reporting.html">
-      ⑤ Reporting status <span class="chip">Double-click for workflows</span>
-    </div>
+    <!-- Row 5 -->
+    <div class="rowhead dbl" data-page="reporting.html">⑤ Reporting status <span class="chip">Double-click for workflows</span></div>
     <div class="cards">
       <div class="kcard span-6"><div class="ic g">✅</div><div class="kv"><div class="label">Balance Sheet (FY 2024-25)</div><div class="value" style="color:#22a06b">Ready</div></div></div>
       <div class="kcard span-6"><div class="ic a">📤</div><div class="kv"><div class="label">Reports pending to send</div><div class="value" style="color:var(--warn)">5</div></div></div>
     </div>
 
-    <div class="tiny">Tip: double-click a row title to jump to its detailed charts.</div>
+    <div class="tiny">Tip: double-click a row title to jump to its detailed page.</div>
   </section>
 </div>
 
-<!-- shared scripts -->
+<!-- JS -->
 <script src="app.js"></script>
 <script src="data.js"></script>
 <script>
-  // lock/unlock app
+  // unlock (or show overlay) on load
   ensureAuth();
 
-  // Snapshot computed values from data.js
-  document.getElementById('ss_women').textContent =
-    (POP * 0.35).toLocaleString('en-IN', { maximumFractionDigits: 0 });
-  const youth = Math.round(POP * (typeof YOUTH_SHARE!=='undefined' ? YOUTH_SHARE : 0.45));
-  const youthEl = document.getElementById('ss_youth'); if (youthEl) youthEl.textContent = youth.toLocaleString('en-IN');
+  // fill snapshot quick stats
+  document.getElementById('ss_women').textContent = (POP*0.35).toLocaleString('en-IN');
+  const youth = document.getElementById('ss_youth');
+  if (youth) youth.textContent = (POP*0.45).toLocaleString('en-IN');
 
-  // Double-click row heads to navigate to separate pages
-  document.querySelectorAll('.rowhead.dbl').forEach(h => {
-    h.addEventListener('dblclick', () => {
-      const href = h.dataset.href;
-      if (href) window.location.href = href;
-    });
+  // double-click a row title -> open the dedicated page
+  document.querySelectorAll('.rowhead.dbl').forEach(el=>{
+    const page = el.getAttribute('data-page');
+    el.style.cursor = 'zoom-in';
+    el.addEventListener('dblclick', ()=>{ if(page) location.href = page; });
   });
+
+  // quick action stubs used on snapshot buttons
+  function openList(kind){ alert((kind==='borrowers'?'Borrowers vs Non-borrowers':'TD vs Non-TD')+' list (demo).'); }
+  function downloadMembersCSV(memberwise=false){
+    const rows=[['Village','Borrowers','Non-borrowers']];
+    const villages=['Utai','Bhothli','Gunderdehi','Gopalpur'];
+    const borrowData = { borrowers:[520,480,560,490], nonBorrowers:[120,110,140,110] };
+    villages.forEach((v,i)=>rows.push([v,borrowData.borrowers[i],borrowData.nonBorrowers[i]]));
+    downloadCSV(memberwise?'members_memberwise.csv':'members.csv',rows);
+  }
 </script>
 </body>
 </html>
