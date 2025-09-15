@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>PACS Utai – Snapshot</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
-<link rel="stylesheet" href="styles.css"/>
+<!-- FIX: your file is style.css (not styles.css) -->
+<link rel="stylesheet" href="style.css"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
 </head>
 <body class="app-only app-locked">
@@ -68,34 +69,104 @@
     <button class="tab" onclick="logout()">Logout</button>
   </div>
 
-  
-<section class="wrap">
-  <div class="rowhead">① PACS profile</div>
-  <div class="cards">
-    <div class="kcard span-3"><div class="ic t">🗺️</div><div class="kv"><div class="label">Villages covered</div><div class="value">5</div></div></div>
-    <div class="kcard span-3"><div class="ic b">🌍</div><div class="kv"><div class="label">Total land holding</div><div class="value">7,150 acres</div></div></div>
-    <div class="kcard span-3"><div class="ic a">🏛️</div><div class="kv"><div class="label">Fixed assets (NBV)</div><div class="value">₹0.72 Cr</div></div></div>
-    <div class="kcard span-3"><div class="ic y">👩</div><div class="kv"><div class="label">Women</div><div class="value" id="ss_women">—</div><div class="mini">~35% of population</div></div></div>
-  </div>
+  <!-- ===== SNAPSHOT (5 rows like original) ===== -->
+  <section class="wrap" id="snapshot">
 
-  <div class="rowhead">② Members profile</div>
-  <div class="cards">
-    <div class="kcard span-3"><div class="ic g">👥</div><div class="kv"><div class="label">Total members</div><div class="value" id="ss_total">2,316</div></div></div>
-    <div class="kcard span-3"><div class="ic b">💳</div><div class="kv"><div class="label">Borrowing</div><div class="value" id="ss_bor">2,050</div><div class="mini">Taking loans</div></div></div>
-    <div class="kcard span-3"><div class="ic a">🚫</div><div class="kv"><div class="label">Non-borrowing</div><div class="value" id="ss_nbor">266</div></div></div>
-    <div class="kcard span-3"><div class="ic t">🏦</div><div class="kv"><div class="label">Active term depositors</div><div class="value" id="ss_td">1,000</div></div></div>
-  </div>
-</section>
+    <!-- Row 1: PACS profile -->
+    <div class="rowhead dbl" data-href="pacs.html">
+      ① PACS profile <span class="chip">Double-click for charts / details</span>
+    </div>
+    <div class="cards">
+      <div class="kcard span-3"><div class="ic t">🗺️</div><div class="kv"><div class="label">Villages covered</div><div class="value">5</div></div></div>
+      <div class="kcard span-3"><div class="ic b">🌍</div><div class="kv"><div class="label">Total land holding</div><div class="value">7,150 acres</div></div></div>
+      <div class="kcard span-3"><div class="ic a">🏛️</div><div class="kv"><div class="label">Fixed assets (NBV)</div><div class="value">₹0.72 Cr</div></div></div>
+      <div class="kcard span-3"><div class="ic y">👩</div><div class="kv"><div class="label">Women</div><div class="value" id="ss_women">—</div><div class="mini">~35% of population</div></div></div>
+      <div class="kcard span-3"><div class="ic p">🧑‍🎓</div><div class="kv"><div class="label">Youth (15–35)</div><div class="value" id="ss_youth">—</div><div class="mini">~45% of population</div></div></div>
+      <div class="kcard span-3"><div class="ic g">🌾</div><div class="kv"><div class="label">Avg land / member</div><div class="value">3.2 acres</div><div class="mini">Across members</div></div></div>
+      <div class="kcard span-3"><div class="ic g">🥔</div><div class="kv"><div class="label">Crop focus</div><div class="value">Paddy</div><div class="mini">Area-wise leader</div></div></div>
+      <div class="kcard span-3"><div class="ic b">🌾</div><div class="kv"><div class="label">Crop focus</div><div class="value">Wheat</div><div class="mini">Second priority</div></div></div>
+    </div>
 
+    <!-- Row 2: Membership -->
+    <div class="rowhead dbl" data-href="membership.html">
+      ② Members profile <span class="chip">Double-click for charts</span>
+    </div>
+    <div class="cards">
+      <div class="kcard span-3"><div class="ic g">👥</div><div class="kv"><div class="label">Total members</div><div class="value" id="ss_total">2,316</div></div></div>
+      <div class="kcard span-3"><div class="ic b">💳</div><div class="kv"><div class="label">Borrowing</div><div class="value" id="ss_bor">2,050</div><div class="mini">Taking loans</div></div></div>
+      <div class="kcard span-3"><div class="ic a">🚫</div><div class="kv"><div class="label">Non-borrowing</div><div class="value" id="ss_nbor">266</div><div class="mini">Not taking loans</div></div></div>
+      <div class="kcard span-3"><div class="ic t">🏦</div><div class="kv"><div class="label">Active term depositors</div><div class="value" id="ss_td">1,000</div></div></div>
+      <div class="kcard span-3"><div class="ic p">💤</div><div class="kv"><div class="label">Non depositors</div><div class="value" id="ss_ntd">1,316</div></div></div>
+      <div class="kcard span-12">
+        <div class="ic b">📋</div>
+        <div class="kv">
+          <div class="label">Quick actions</div>
+          <div class="toolbar" style="margin-top:2px">
+            <button class="btn btn-outline" onclick="openList('borrowers')">Borrowers vs Non-borrowers – View list</button>
+            <button class="btn btn-outline" onclick="openList('td')">Term-deposit givers vs Non-TD – View list</button>
+            <button class="btn btn-outline" onclick="downloadMembersCSV(true)">Download members CSV</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Loan profile -->
+    <div class="rowhead dbl" data-href="loan.html">
+      ③ Loan profile <span class="chip">Double-click for charts</span>
+    </div>
+    <div class="cards">
+      <div class="kcard span-3"><div class="ic g">💰</div><div class="kv"><div class="label">Total outstanding</div><div class="value">₹1.2 Cr</div><div class="mini">FY 2024–25</div></div></div>
+      <div class="kcard span-3"><div class="ic b">🧾</div><div class="kv"><div class="label">Avg KCC</div><div class="value">96%</div><div class="mini">Coverage across members</div></div></div>
+      <div class="kcard span-3"><div class="ic t">📉</div><div class="kv"><div class="label">Avg NPA</div><div class="value">4.2%</div></div></div>
+      <div class="kcard span-3"><div class="ic a">⛔</div><div class="kv"><div class="label">Members in DPD</div><div class="value">&gt;30: 84 | &gt;60: 42 | &gt;90: 18</div><div class="mini" style="color:var(--danger)">Focus on &gt;90</div></div></div>
+    </div>
+
+    <!-- Row 4: Non-credit -->
+    <div class="rowhead dbl" data-href="noncredit.html">
+      ④ Non-credit activities <span class="chip">Double-click for details</span>
+    </div>
+    <div class="cards">
+      <div class="kcard span-3"><div class="ic g">🧪</div><div class="kv"><div class="label">Fertilisers – sales</div><div class="value">₹1.05 Cr</div></div></div>
+      <div class="kcard span-3"><div class="ic b">🧴</div><div class="kv"><div class="label">Pesticides – sales</div><div class="value">₹0.18 Cr</div></div></div>
+      <div class="kcard span-3"><div class="ic a">🌱</div><div class="kv"><div class="label">Seeds – sales</div><div class="value">₹0.42 Cr</div></div></div>
+      <div class="kcard span-3"><div class="ic t">🌾</div><div class="kv"><div class="label">Paddy procurement – sales</div><div class="value">₹21.26 L</div></div></div>
+      <div class="kcard span-3"><div class="ic p">🏦</div><div class="kv"><div class="label">Deposits & CSC</div><div class="value">₹1.39 Cr</div><div class="mini">Commissions + dividends</div></div></div>
+      <div class="kcard span-3"><div class="ic b">⭐</div><div class="kv"><div class="label">Diversification score</div><div class="value">72 / 100</div><div class="mini">Higher is better</div></div></div>
+    </div>
+
+    <!-- Row 5: Reporting -->
+    <div class="rowhead dbl" data-href="reporting.html">
+      ⑤ Reporting status <span class="chip">Double-click for workflows</span>
+    </div>
+    <div class="cards">
+      <div class="kcard span-6"><div class="ic g">✅</div><div class="kv"><div class="label">Balance Sheet (FY 2024-25)</div><div class="value" style="color:#22a06b">Ready</div></div></div>
+      <div class="kcard span-6"><div class="ic a">📤</div><div class="kv"><div class="label">Reports pending to send</div><div class="value" style="color:var(--warn)">5</div></div></div>
+    </div>
+
+    <div class="tiny">Tip: double-click a row title to jump to its detailed charts.</div>
+  </section>
 </div>
 
+<!-- shared scripts -->
 <script src="app.js"></script>
 <script src="data.js"></script>
-<script>ensureAuth();</script>
 <script>
+  // lock/unlock app
+  ensureAuth();
 
-document.getElementById('ss_women').textContent = (POP*0.35).toLocaleString('en-IN',{maximumFractionDigits:0});
+  // Snapshot computed values from data.js
+  document.getElementById('ss_women').textContent =
+    (POP * 0.35).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  const youth = Math.round(POP * (typeof YOUTH_SHARE!=='undefined' ? YOUTH_SHARE : 0.45));
+  const youthEl = document.getElementById('ss_youth'); if (youthEl) youthEl.textContent = youth.toLocaleString('en-IN');
 
+  // Double-click row heads to navigate to separate pages
+  document.querySelectorAll('.rowhead.dbl').forEach(h => {
+    h.addEventListener('dblclick', () => {
+      const href = h.dataset.href;
+      if (href) window.location.href = href;
+    });
+  });
 </script>
 </body>
 </html>
