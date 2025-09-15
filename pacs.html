@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PACS Utai – PACS Profile</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+</head>
+<body class="app-only app-locked">
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" class="login-overlay" aria-modal="true" role="dialog">
+  <div class="login-card">
+    <div class="hd">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="logo" aria-hidden="true" style="background:#fff">
+          <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="" loading="lazy" width="40" height="40" referrerpolicy="no-referrer"/>
+        </div>
+        <div>
+          <div class="ttl" style="color:#145a2a">PACS Utai — Sign in</div>
+          <div class="meta" style="color:#374151">Durg, Chhattisgarh • Established 1982</div>
+        </div>
+      </div>
+    </div>
+    <form class="login-body" onsubmit="return handleLogin(event)">
+      <div class="login-row">
+        <label for="loginId">Login ID</label>
+        <input id="loginId" class="login-input" type="text" placeholder="Enter Login ID" autocomplete="username" required/>
+      </div>
+      <div class="login-row">
+        <label for="loginPw">Password</label>
+        <input id="loginPw" class="login-input" type="password" placeholder="Enter Password" autocomplete="current-password" required/>
+      </div>
+      <div class="login-actions">
+        <div style="display:flex;align-items:center;gap:8px">
+          <button type="submit" class="btn-solid">Sign in</button>
+          <button type="button" class="btn-ghost" onclick="document.getElementById('loginPw').type = document.getElementById('loginPw').type==='password'?'text':'password'">Show/Hide</button>
+        </div>
+        <div id="loginErr" class="login-error">Invalid credentials</div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="app-only">
+  <div class="appbar">
+    <div class="row">
+      <a class="logo" href="index.html" aria-label="NABARD">
+        <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="NABARD logo" loading="lazy" width="40" height="40" referrerpolicy="no-referrer"/>
+      </a>
+      <div>
+        <div class="ttl">PACS Utai – Executive Snapshot & Drill-downs</div>
+        <div class="meta">Durg, Chhattisgarh • Established 1982</div>
+      </div>
+      <div class="welcome">Welcome, <b>Mr. Girdhar Soni, Sachiv ji</b> 🙏</div>
+    </div>
+    <div class="tabs">
+      <a class="tab" href="index.html">Snapshot</a>
+      <a class="tab" href="pacs.html">PACS profile</a>
+      <a class="tab" href="membership.html">Membership</a>
+      <a class="tab" href="loan.html">Loan profile</a>
+      <a class="tab" href="noncredit.html">Non-credit</a>
+      <a class="tab" href="reporting.html">Reporting</a>
+    </div>
+  </div>
+  <div style="padding:8px 12px">
+    <button class="tab" onclick="logout()">Logout</button>
+  </div>
+
+  
+<section class="wrap">
+  <div class="card span-12">
+    <div class="hd">PACS Overview <span class="sub">Village population • Farmer households • Members • Coverage</span></div>
+    <div class="bd">
+      <div class="grid">
+        <div class="kcard span-3"><div class="ic b">🏘️</div><div class="kv"><div class="label">Village population</div><div class="value" id="popVal">24,500</div></div></div>
+        <div class="kcard span-3"><div class="ic g">👨‍🌾</div><div class="kv"><div class="label">Farmer households</div><div class="value">5,600</div></div></div>
+        <div class="kcard span-3"><div class="ic p">🧑‍🤝‍🧑</div><div class="kv"><div class="label">PACS members</div><div class="value">2,316</div></div></div>
+        <div class="kcard span-3"><div class="ic a">✅</div><div class="kv"><div class="label">Eligible for loans</div><div class="value">1,980</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card span-6">
+      <div class="hd">Cashflow Monitoring (Trend) <span class="pill">Simple view</span></div>
+      <div class="bd">
+        <div class="chart-wrap"><canvas id="cashflowChart"></canvas></div>
+        <div class="insights" id="cashflowInsights"></div>
+      </div>
+    </div>
+    <div class="card span-6">
+      <div class="hd">Crop Calendar (Static)</div>
+      <div class="bd">
+        <div class="mini">Use this to align disbursements with sowing and repayments with harvest.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script src="assets/app.js"></script>
+<script src="assets/data.js"></script>
+<script>ensureAuth();</script>
+<script>
+
+document.getElementById('popVal').textContent = POP.toLocaleString('en-IN');
+const cw = document.getElementById('cashflowChart').getContext('2d');
+new Chart(cw,{
+  type:'line',
+  data:{labels:cashflow.months,datasets:[
+    {label:'Inflows (₹ Cr)', data:cashflow.inflow, borderColor:'#2e7d32', tension:.35},
+    {label:'Outflows (₹ Cr)', data:cashflow.outflow, borderColor:'#c62828', tension:.35},
+    {label:'Net (₹ Cr)', data:cashflow.net, borderColor:'#1565c0', tension:.35}
+  ]},
+  options:{responsive:true, plugins:{legend:{position:'top'}}}
+});
+
+</script>
+</body>
+</html>

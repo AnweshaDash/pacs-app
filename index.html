@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PACS Utai – Snapshot</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+</head>
+<body class="app-only app-locked">
+<!-- LOGIN OVERLAY -->
+<div id="loginOverlay" class="login-overlay" aria-modal="true" role="dialog">
+  <div class="login-card">
+    <div class="hd">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="logo" aria-hidden="true" style="background:#fff">
+          <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="" loading="lazy" width="40" height="40" referrerpolicy="no-referrer"/>
+        </div>
+        <div>
+          <div class="ttl" style="color:#145a2a">PACS Utai — Sign in</div>
+          <div class="meta" style="color:#374151">Durg, Chhattisgarh • Established 1982</div>
+        </div>
+      </div>
+    </div>
+    <form class="login-body" onsubmit="return handleLogin(event)">
+      <div class="login-row">
+        <label for="loginId">Login ID</label>
+        <input id="loginId" class="login-input" type="text" placeholder="Enter Login ID" autocomplete="username" required/>
+      </div>
+      <div class="login-row">
+        <label for="loginPw">Password</label>
+        <input id="loginPw" class="login-input" type="password" placeholder="Enter Password" autocomplete="current-password" required/>
+      </div>
+      <div class="login-actions">
+        <div style="display:flex;align-items:center;gap:8px">
+          <button type="submit" class="btn-solid">Sign in</button>
+          <button type="button" class="btn-ghost" onclick="document.getElementById('loginPw').type = document.getElementById('loginPw').type==='password'?'text':'password'">Show/Hide</button>
+        </div>
+        <div id="loginErr" class="login-error">Invalid credentials</div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="app-only">
+  <div class="appbar">
+    <div class="row">
+      <a class="logo" href="index.html" aria-label="NABARD">
+        <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="NABARD logo" loading="lazy" width="40" height="40" referrerpolicy="no-referrer"/>
+      </a>
+      <div>
+        <div class="ttl">PACS Utai – Executive Snapshot & Drill-downs</div>
+        <div class="meta">Durg, Chhattisgarh • Established 1982</div>
+      </div>
+      <div class="welcome">Welcome, <b>Mr. Girdhar Soni, Sachiv ji</b> 🙏</div>
+    </div>
+    <div class="tabs">
+      <a class="tab" href="index.html">Snapshot</a>
+      <a class="tab" href="pacs.html">PACS profile</a>
+      <a class="tab" href="membership.html">Membership</a>
+      <a class="tab" href="loan.html">Loan profile</a>
+      <a class="tab" href="noncredit.html">Non-credit</a>
+      <a class="tab" href="reporting.html">Reporting</a>
+    </div>
+  </div>
+  <div style="padding:8px 12px">
+    <button class="tab" onclick="logout()">Logout</button>
+  </div>
+
+  
+<section class="wrap">
+  <div class="rowhead">① PACS profile</div>
+  <div class="cards">
+    <div class="kcard span-3"><div class="ic t">🗺️</div><div class="kv"><div class="label">Villages covered</div><div class="value">5</div></div></div>
+    <div class="kcard span-3"><div class="ic b">🌍</div><div class="kv"><div class="label">Total land holding</div><div class="value">7,150 acres</div></div></div>
+    <div class="kcard span-3"><div class="ic a">🏛️</div><div class="kv"><div class="label">Fixed assets (NBV)</div><div class="value">₹0.72 Cr</div></div></div>
+    <div class="kcard span-3"><div class="ic y">👩</div><div class="kv"><div class="label">Women</div><div class="value" id="ss_women">—</div><div class="mini">~35% of population</div></div></div>
+  </div>
+
+  <div class="rowhead">② Members profile</div>
+  <div class="cards">
+    <div class="kcard span-3"><div class="ic g">👥</div><div class="kv"><div class="label">Total members</div><div class="value" id="ss_total">2,316</div></div></div>
+    <div class="kcard span-3"><div class="ic b">💳</div><div class="kv"><div class="label">Borrowing</div><div class="value" id="ss_bor">2,050</div><div class="mini">Taking loans</div></div></div>
+    <div class="kcard span-3"><div class="ic a">🚫</div><div class="kv"><div class="label">Non-borrowing</div><div class="value" id="ss_nbor">266</div></div></div>
+    <div class="kcard span-3"><div class="ic t">🏦</div><div class="kv"><div class="label">Active term depositors</div><div class="value" id="ss_td">1,000</div></div></div>
+  </div>
+</section>
+
+</div>
+
+<script src="assets/app.js"></script>
+<script src="assets/data.js"></script>
+<script>ensureAuth();</script>
+<script>
+
+document.getElementById('ss_women').textContent = (POP*0.35).toLocaleString('en-IN',{maximumFractionDigits:0});
+
+</script>
+</body>
+</html>
