@@ -44,3 +44,17 @@ function downloadCSV(filename, rows){
   const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
   setTimeout(()=>URL.revokeObjectURL(url), 1000);
 }
+
+/* ----- Snapshot helpers for index.html ----- */
+function openList(kind){
+  alert((kind==='borrowers' ? 'Borrowers vs Non-borrowers' : 'TD vs Non-TD') + ' list (demo).');
+}
+
+function downloadMembersCSV(memberwise=false){
+  if (typeof villages==='undefined' || typeof borrowData==='undefined') {
+    alert('Data not loaded'); return;
+  }
+  const rows=[['Village','Borrowers','Non-borrowers']];
+  villages.forEach((v,i)=>rows.push([v, borrowData.borrowers[i], borrowData.nonBorrowers[i]]));
+  downloadCSV(memberwise ? 'members_memberwise.csv' : 'members.csv', rows);
+}
