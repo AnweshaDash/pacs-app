@@ -64,3 +64,6 @@ th{background:var(--brand-100); color:var(--brand)}
 .btn-ghost{ background:#ffffff; color:#145a2a; border:1px solid var(--stroke); padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer;}
 .login-error{ font-size:12px; color:#fff; background:#c62828; border-radius:999px; padding:6px 10px; display:none }
 .app-locked .app-only { display:none !important; }
+
+/* --- loan page niceties --- */
+.toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
