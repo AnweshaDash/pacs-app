@@ -110,3 +110,11 @@ const concentration = {
 const peerVillages = ['Utai','Dhaba','Surgi','Somni','Karanja Bhillai','Nankatthi'];
 const avgTicket = [72,80,66,61,78,59]; // ₹k
 const repayPct  = [86,92,78,74,89,71];
+
+
+// --- Additional series used by the new tabs ---
+const cpMembers = {
+  byVillage: [650, 540, 580, 546],                 // members per village (demo)
+  borrowersByVillage: [520, 480, 560, 490],        // reuse-ish
+  borrowerPctVillage: [80, 89, 96, 90]             // demo %
+};
