@@ -1,374 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>PACS Utai – Loan Profile</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net"/>
-<link rel="stylesheet" href="styles.css"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PACS Utai – Loan Profile</title>
 
-<!-- Chart.js core + plugins -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@2.3.0"></script>
+  <!-- PRE-AUTH: prevent overlay flash on refresh -->
+  <script>
+    (function(){
+      if (localStorage.getItem('pacs_auth') === '1') {
+        document.documentElement.classList.add('authed');
+      }
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+  <link rel="stylesheet" href="styles.css"/>
+
+  <!-- Chart.js + plugins -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@2.3.0"></script>
 </head>
 
-<body class="app-only app-locked">
-<!-- LOGIN OVERLAY (kept) -->
-<div id="loginOverlay" class="login-overlay" aria-modal="true" role="dialog">
-  <div class="login-card">
-    <div class="hd">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="logo" aria-hidden="true" style="background:#fff">
-          <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="" loading="lazy" width="40" height="40" referrerpolicy="no-referrer"/>
+<body>
+  <!-- LOGIN OVERLAY -->
+  <div id="loginOverlay" class="login-overlay" aria-modal="true" role="dialog">
+    <div class="login-card">
+      <div class="hd">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="logo" aria-hidden="true" style="background:#fff">
+            <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="" width="40" height="40" referrerpolicy="no-referrer"/>
+          </div>
+          <div>
+            <div class="ttl" style="color:#145a2a">PACS Utai — Sign in</div>
+            <div class="meta" style="color:#374151">Durg, Chhattisgarh • Established 1982</div>
+          </div>
         </div>
+      </div>
+      <form class="login-body" onsubmit="return handleLogin(event)">
+        <div class="login-row">
+          <label for="loginId">Login ID</label>
+          <input id="loginId" class="login-input" type="text" placeholder="Enter Login ID" autocomplete="username" required/>
+        </div>
+        <div class="login-row">
+          <label for="loginPw">Password</label>
+          <input id="loginPw" class="login-input" type="password" placeholder="Enter Password" autocomplete="current-password" required/>
+        </div>
+        <div class="login-actions">
+          <div style="display:flex;align-items:center;gap:8px">
+            <button type="submit" class="btn-solid">Sign in</button>
+            <button type="button" class="btn-ghost" onclick="document.getElementById('loginPw').type = document.getElementById('loginPw').type==='password'?'text':'password'">Show/Hide</button>
+          </div>
+          <div id="loginErr" class="login-error">Invalid credentials</div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app-only">
+    <div class="appbar">
+      <div class="row">
+        <a class="logo" href="index.html" aria-label="NABARD">
+          <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="NABARD logo" width="40" height="40" referrerpolicy="no-referrer"/>
+        </a>
         <div>
-          <div class="ttl" style="color:#145a2a">PACS Utai — Sign in</div>
-          <div class="meta" style="color:#374151">Durg, Chhattisgarh • Established 1982</div>
+          <div class="ttl">PACS Utai – Executive Snapshot & Drill-downs</div>
+          <div class="meta">Durg, Chhattisgarh • Established 1982</div>
         </div>
+        <div class="welcome">Welcome, <b>Mr. Girdhar Soni, Sachiv ji</b> 🙏</div>
+      </div>
+      <div class="tabs">
+        <a class="tab" href="index.html">Snapshot</a>
+        <a class="tab" href="pacs.html">PACS profile</a>
+        <a class="tab" href="membership.html">Membership</a>
+        <a class="tab active" href="loan.html">Loan profile</a>
+        <a class="tab" href="noncredit.html">Non-credit</a>
+        <a class="tab" href="reporting.html">Reporting</a>
       </div>
     </div>
-    <form class="login-body" onsubmit="return handleLogin(event)">
-      <div class="login-row">
-        <label for="loginId">Login ID</label>
-        <input id="loginId" class="login-input" type="text" placeholder="Enter Login ID" autocomplete="username" required/>
-      </div>
-      <div class="login-row">
-        <label for="loginPw">Password</label>
-        <input id="loginPw" class="login-input" type="password" placeholder="Enter Password" autocomplete="current-password" required/>
-      </div>
-      <div class="login-actions">
-        <div style="display:flex;align-items:center;gap:8px">
-          <button type="submit" class="btn-solid">Sign in</button>
-          <button type="button" class="btn-ghost" onclick="document.getElementById('loginPw').type = document.getElementById('loginPw').type==='password'?'text':'password'">Show/Hide</button>
+    <div style="padding:8px 12px">
+      <button class="tab" onclick="logout()">Logout</button>
+    </div>
+
+    <section class="wrap">
+      <!-- ====== CREDIT PENETRATION (single tile with tabs) ====== -->
+      <div class="card span-12">
+        <div class="hd">
+          <div>1) Credit Penetration</div>
+          <div class="seg" role="tablist" aria-label="Credit Penetration views">
+            <button role="tab" class="active" data-target="cp-members">Members / Borrowers</button>
+            <button role="tab" data-target="cp-borrowerpct">Borrower %</button>
+            <button role="tab" data-target="cp-land">Land: Owned vs Financed</button>
+            <button role="tab" data-target="cp-village">Village-wise view</button>
+          </div>
         </div>
-        <div id="loginErr" class="login-error">Invalid credentials</div>
+        <div class="bd">
+          <div class="tiles">
+            <div class="kcard"><div class="ic g">👥</div><div class="kv"><div class="label">Members</div><div class="value" id="kpiMembers">—</div></div></div>
+            <div class="kcard"><div class="ic b">💳</div><div class="kv"><div class="label">Borrowers</div><div class="value" id="kpiBorrowers">—</div></div></div>
+            <div class="kcard"><div class="ic a">📈</div><div class="kv"><div class="label">Borrower %</div><div class="value" id="kpiBorrowerPct">—%</div></div></div>
+            <div class="kcard"><div class="ic t">🌾</div><div class="kv"><div class="label">Financed / Owned land</div><div class="value" id="kpiLandPct">—</div></div></div>
+          </div>
+
+          <!-- canvases swap via tabs -->
+          <div class="chart-wrap tall">
+            <canvas id="cpChart"></canvas>
+          </div>
+
+          <div class="toolbar">
+            <button class="btn" onclick="viewGapDetails()">View gap details</button>
+            <button class="btn btn-blue" onclick="initiateMobilization()">Initiate mobilization</button>
+            <button class="btn btn-warn" onclick="flagDataIssue()">Flag data issue</button>
+            <button class="btn btn-outline" onclick="recommendTopup()">Top-up recommendation</button>
+            <button class="btn btn-outline" onclick="exportCoverage()">Download CSV</button>
+          </div>
+        </div>
       </div>
-    </form>
+
+      <!-- ====== LOAN PORTFOLIO (single tile with tabs) ====== -->
+      <div class="card span-12">
+        <div class="hd">
+          <div>2) Loan Portfolio</div>
+          <div class="seg" role="tablist" aria-label="Loan Portfolio views">
+            <button role="tab" class="active" data-target="lp-term">KCC / MT / LT</button>
+            <button role="tab" data-target="lp-season">KCC: Kharif vs Rabi</button>
+            <button role="tab" data-target="lp-insurance">Insurance coverage</button>
+            <button role="tab" data-target="lp-ticket">Ticket sizes</button>
+            <button role="tab" data-target="lp-enduse">End use split</button>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="chart-wrap tall">
+            <canvas id="loanChart"></canvas>
+          </div>
+          <div class="toolbar">
+            <button class="btn" onclick="chaseUninsured()">Chase uninsured</button>
+            <button class="btn btn-outline" onclick="exportInsurance()">Download Insurance CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== REPAYMENT (single tile with tabs) ====== -->
+      <div class="card span-12">
+        <div class="hd">
+          <div>3) Repayment</div>
+          <div class="seg" role="tablist" aria-label="Repayment views">
+            <button role="tab" class="active" data-target="rp-cohort">Past cohorts (Rabi/Kharif)</button>
+            <button role="tab" data-target="rp-aging">To-be-due aging</button>
+            <button role="tab" data-target="rp-dpd">DPD buckets</button>
+            <button role="tab" data-target="rp-npa">NPA nomenclature</button>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="chart-wrap tall">
+            <canvas id="repayChart"></canvas>
+          </div>
+          <div class="toolbar">
+            <button class="btn" onclick="sendReminders()">Send reminders</button>
+            <button class="btn btn-outline" onclick="downloadDueList()">Download due list</button>
+            <button class="btn btn-warn" onclick="escalate90()">Escalate &gt;90 DPD</button>
+            <button class="btn btn-outline" onclick="exportDPD()">Export DPD CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== CONCENTRATION + PEER (two views in one tile) ====== -->
+      <div class="card span-12">
+        <div class="hd">
+          <div>4) Concentration & Peer Benchmarking</div>
+          <div class="seg" role="tablist" aria-label="Peer & Concentration views">
+            <button role="tab" class="active" data-target="cx-conc">Portfolio Concentration</button>
+            <button role="tab" data-target="cx-peer">Peer KPIs</button>
+          </div>
+        </div>
+        <div class="bd">
+          <div class="chart-wrap tall">
+            <canvas id="cxChart"></canvas>
+          </div>
+          <div class="toolbar">
+            <button class="btn btn-outline" onclick="downloadPeerLoan()">Download peer report</button>
+            <button class="btn" onclick="setTargets()">Set improvement targets</button>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
-</div>
 
-<!-- APP -->
-<div class="app-only">
-  <div class="appbar">
-    <div class="row">
-      <a class="logo" href="index.html" aria-label="NABARD">
-        <img src="https://www.nabard.org/auth/writereaddata/ContentImgs/1303194734NABARD-ENG-logo-big.png" alt="NABARD logo" loading="lazy" width="40" height="40" referrerpolicy="no-referrer"/>
-      </a>
-      <div>
-        <div class="ttl">PACS Utai – Executive Snapshot & Drill-downs</div>
-        <div class="meta">Durg, Chhattisgarh • Established 1982</div>
-      </div>
-      <div class="welcome">Welcome, <b>Mr. Girdhar Soni, Sachiv ji</b> 🙏</div>
-    </div>
-    <div class="tabs">
-      <a class="tab" href="index.html">Snapshot</a>
-      <a class="tab" href="pacs.html">PACS profile</a>
-      <a class="tab" href="membership.html">Membership</a>
-      <a class="tab active" href="loan.html">Loan profile</a>
-      <a class="tab" href="noncredit.html">Non-credit</a>
-      <a class="tab" href="reporting.html">Reporting</a>
-    </div>
-  </div>
-  <div style="padding:8px 12px">
-    <button class="tab" onclick="logout()">Logout</button>
-  </div>
+  <!-- scripts -->
+  <script src="app.js"></script>
+  <script src="data.js"></script>
+  <script>
+    /* ---------- auth gate ---------- */
+    ensureAuth();
 
-  <section class="wrap">
+    /* ---------- helpers ---------- */
+    const C = id => document.getElementById(id)?.getContext('2d');
 
-    <!-- ===== Single Tile 1: Credit Penetration ===== -->
-    <h2 class="bucket">1) Credit Penetration</h2>
-    <div class="card span-12">
-      <div class="hd">
-        <span>Village-wise credit absorption & coverage</span>
-        <div class="seg" id="cpTabs"
-             data-tabs="members,borrowers,borrowerPct,landOwnedVsFinanced,coverageHeat">
-          <button class="seg-btn active" data-k="members"># Members</button>
-          <button class="seg-btn" data-k="borrowers"># Borrowers</button>
-          <button class="seg-btn" data-k="borrowerPct">Borrower %</button>
-          <button class="seg-btn" data-k="landOwnedVsFinanced">Land: Owned vs Financed</button>
-          <button class="seg-btn" data-k="coverageHeat">Coverage Heatmap</button>
-        </div>
-      </div>
-      <div class="bd">
-        <div class="kpi-row">
-          <div class="kcard"><div class="ic g">👥</div><div class="kv"><div class="label">Members</div><div class="value" id="k_members">—</div></div></div>
-          <div class="kcard"><div class="ic b">💳</div><div class="kv"><div class="label">Borrowers</div><div class="value" id="k_borrowers">—</div></div></div>
-          <div class="kcard"><div class="ic a">📈</div><div class="kv"><div class="label">Borrower %</div><div class="value" id="k_borrowerPct">—%</div></div></div>
-          <div class="kcard"><div class="ic t">🌾</div><div class="kv"><div class="label">Financed / Owned land</div><div class="value" id="k_landPct">—%</div></div></div>
-        </div>
+    const valueLabelPlugin = {
+      id:'valabel',
+      afterDatasetsDraw(chart){
+        const {ctx} = chart; ctx.save();
+        chart.data.datasets.forEach((ds,dsi)=>{
+          const meta=chart.getDatasetMeta(dsi);
+          (meta?.data||[]).forEach((el,i)=>{
+            const v=ds.data[i]; if(v==null) return;
+            const {x,y}=el.tooltipPosition(); ctx.fillStyle='#374151'; ctx.font='12px Inter,Arial'; ctx.textAlign='center';
+            ctx.fillText(String(v), x, y-6);
+          });
+        });
+        ctx.restore();
+      }
+    };
 
-        <div class="chart-wrap"><canvas id="cpCanvas"></canvas></div>
+    /* ---------- KPIs ---------- */
+    document.getElementById('kpiMembers').textContent   = creditPenetration.members.toLocaleString('en-IN');
+    document.getElementById('kpiBorrowers').textContent = creditPenetration.borrowers.toLocaleString('en-IN');
+    document.getElementById('kpiBorrowerPct').textContent = Math.round(creditPenetration.borrowers/creditPenetration.members*100) + '%';
+    document.getElementById('kpiLandPct').textContent   = Math.round(creditPenetration.landFinanced/creditPenetration.landOwned*100) + '%';
 
-        <div class="toolbar" id="cpCtas">
-          <button class="btn" onclick="viewGapDetails()">View gap details</button>
-          <button class="btn btn-blue" onclick="initiateMobilization()">Initiate mobilization</button>
-          <button class="btn btn-warn" onclick="flagDataIssue()">Flag data issue</button>
-          <button class="btn btn-outline" onclick="recommendTopup()">Top-up recommendation</button>
-          <button class="btn btn-outline" onclick="exportCoverage()">Download CSV</button>
-        </div>
-      </div>
-    </div>
+    /* ---------- CHART BUILDERS (swapped by tabs) ---------- */
+    let cpChart, loanChart, repayChart, cxChart;
 
-    <!-- ===== Single Tile 2: Loan Portfolio ===== -->
-    <h2 class="bucket">2) Loan Portfolio</h2>
-    <div class="card span-12">
-      <div class="hd">
-        <span>Structure of KCC & other term loans</span>
-        <div class="seg" id="lpTabs"
-             data-tabs="termSplit,seasonSplit,insurance,ticketSizes,endUse">
-          <button class="seg-btn active" data-k="termSplit">Term: KCC/MT/LT</button>
-          <button class="seg-btn" data-k="seasonSplit">KCC: Rabi vs Kharif</button>
-          <button class="seg-btn" data-k="insurance">Insurance Coverage</button>
-          <button class="seg-btn" data-k="ticketSizes">Ticket Sizes</button>
-          <button class="seg-btn" data-k="endUse">End-Use</button>
-        </div>
-      </div>
-      <div class="bd">
-        <div class="chart-wrap"><canvas id="lpCanvas"></canvas></div>
-        <div class="toolbar" id="lpCtas">
-          <button class="btn" onclick="chaseUninsured()">Chase uninsured</button>
-          <button class="btn btn-outline" onclick="exportInsurance()">Download CSV</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== Single Tile 3: Repayment ===== -->
-    <h2 class="bucket">3) Repayment</h2>
-    <div class="card span-12">
-      <div class="hd">
-        <span>Collections risk & performance</span>
-        <div class="seg" id="rpTabs" data-tabs="cohort,aging,dpdNpa">
-          <button class="seg-btn active" data-k="cohort">Past Cohorts</button>
-          <button class="seg-btn" data-k="aging">To-be-Due Aging</button>
-          <button class="seg-btn" data-k="dpdNpa">DPD & NPA</button>
-        </div>
-      </div>
-      <div class="bd">
-        <div class="chart-wrap"><canvas id="rpCanvas"></canvas></div>
-        <div class="toolbar" id="rpCtas">
-          <button class="btn" onclick="sendReminders()">Send reminders</button>
-          <button class="btn btn-outline" onclick="downloadDueList()">Download due list</button>
-          <button class="btn btn-warn" onclick="escalate90()">Escalate &gt;90 DPD</button>
-          <button class="btn btn-outline" onclick="exportDPD()">Export DPD CSV</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== Multi-chart Tile: Concentration & Peer ===== -->
-    <h2 class="bucket">4) Concentration & Peer Benchmarking</h2>
-    <div class="card span-12">
-      <div class="hd">
-        <span>Concentration & Peer signals</span>
-        <div class="seg" id="pbTabs" data-tabs="concentration,peer">
-          <button class="seg-btn active" data-k="concentration">Concentration</button>
-          <button class="seg-btn" data-k="peer">Peer KPIs</button>
-        </div>
-      </div>
-      <div class="bd">
-        <div class="chart-wrap"><canvas id="pbCanvas"></canvas></div>
-        <div class="toolbar">
-          <button class="btn btn-outline" onclick="downloadPeerLoan()">Download peer report</button>
-          <button class="btn" onclick="setTargets()">Set improvement targets</button>
-        </div>
-      </div>
-    </div>
-
-  </section>
-</div>
-
-<!-- scripts -->
-<script src="app.js"></script>
-<script src="data.js"></script>
-<script>
-  // -------- ensure auth + helpers ----------
-  ensureAuth();
-  const C = (id)=>document.getElementById(id)?.getContext('2d');
-  const fmt = n => Number(n).toLocaleString('en-IN');
-
-  // KPI chips
-  document.getElementById('k_members').textContent     = fmt(creditPenetration.members);
-  document.getElementById('k_borrowers').textContent   = fmt(creditPenetration.borrowers);
-  document.getElementById('k_borrowerPct').textContent = Math.round(creditPenetration.borrowers/creditPenetration.members*100) + '%';
-  document.getElementById('k_landPct').textContent     = Math.round(creditPenetration.landFinanced/creditPenetration.landOwned*100) + '%';
-
-  // tiny label plugin
-  const labelsPlugin = { id:'lbl', afterDatasetsDraw(c){const {ctx}=c;ctx.save();
-    c.data.datasets.forEach((ds,di)=>{(c.getDatasetMeta(di).data||[]).forEach((pt,i)=>{
-      const v=ds.data[i]; if(v==null) return; const p=pt.tooltipPosition();
-      ctx.font='12px Inter,Arial'; ctx.fillStyle='#374151'; ctx.textAlign='center';
-      ctx.fillText(Array.isArray(v)?'':String(v), p.x, p.y-6);
-    })}); ctx.restore();}
-  };
-
-  // pretty gradient
-  function grad(ctx, top='#1976d2', bottom='#90caf9'){
-    const g = ctx.createLinearGradient(0,0,0,240); g.addColorStop(0,top); g.addColorStop(1,bottom); return g;
-  }
-
-  // ---------- CREDIT PENETRATION tile ----------
-  let cpChart;
-  const cpCanvas = C('cpCanvas');
-
-  function renderCP(view='members'){
-    if(cpChart) cpChart.destroy();
-    const optsBase={responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}};
-    if(view==='members'){
-      cpChart = new Chart(cpCanvas,{type:'bar', data:{labels:coverage.villages,
-        datasets:[{label:'Members', data:cpMembers.byVillage, backgroundColor:grad(cpCanvas,'#2e7d32','#a5d6a7')}]}, options:optsBase, plugins:[labelsPlugin]});
-    }else if(view==='borrowers'){
-      cpChart = new Chart(cpCanvas,{type:'bar', data:{labels:coverage.villages,
-        datasets:[{label:'Borrowers', data:cpMembers.borrowersByVillage, backgroundColor:grad(cpCanvas,'#1976d2','#90caf9')}]}, options:optsBase, plugins:[labelsPlugin]});
-    }else if(view==='borrowerPct'){
-      cpChart = new Chart(cpCanvas,{type:'line', data:{labels:coverage.villages,
-        datasets:[{label:'Borrower %', data:cpMembers.borrowerPctVillage, borderColor:'#2e7d32', fill:false, tension:.35, pointRadius:4}]},
-        options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}, plugins:[labelsPlugin]});
-    }else if(view==='landOwnedVsFinanced'){
-      cpChart = new Chart(cpCanvas,{type:'bar', data:{labels:coverage.villages, datasets:[
-        {label:'Owned (acres)', data:landVsFinanced.owned, backgroundColor:'#bbdefb'},
-        {label:'KCC-financed (acres)', data:landVsFinanced.financed, backgroundColor:'#1976d2'}]},
-        options:{responsive:true, plugins:{legend:{position:'top'}}, scales:{y:{beginAtZero:true}}}, plugins:[labelsPlugin]});
-    }else{ // coverageHeat
-      // build matrix cells
-      const cells=[]; coverage.crops.forEach((crop,x)=>{ coverage.villages.forEach((v,y)=>{
-        const pct = coverage.matrix[y][x]; cells.push({x,y,v:pct}); });});
-      cpChart = new Chart(cpCanvas,{type:'matrix', data:{datasets:[{
-        data:cells, width:({chart})=>(chart.chartArea?.width||0)/(coverage.crops.length+0.2),
-        height:({chart})=>(chart.chartArea?.height||0)/(coverage.villages.length+0.2),
-        borderColor:'#e5e7eb', borderWidth:1,
-        backgroundColor:ctx=>{const v=ctx.raw.v; if(v<40) return '#ff8a80'; if(v<70) return '#ffd54f'; return '#81c784';}
-      }]},
-      options:{responsive:true, plugins:{legend:{display:false}, tooltip:{callbacks:{
-        title:(it)=> coverage.villages[it[0].raw.y]+' • '+coverage.crops[it[0].raw.x],
-        label:(it)=> 'Coverage: '+it.raw.v+'%'}}},
-      scales:{x:{type:'category', labels:coverage.crops, position:'top', grid:{display:false}},
-              y:{type:'category', labels:coverage.villages, offset:true, grid:{display:false,drawBorder:false}}}});
+    function buildCP(view){
+      const ctx = C('cpChart');
+      if (!ctx) return;
+      cpChart?.destroy();
+      if (view==='cp-members'){
+        cpChart = new Chart(ctx,{
+          type:'bar',
+          data:{labels:['Members','Borrowers'], datasets:[{data:[creditPenetration.members,creditPenetration.borrowers], backgroundColor:['#90caf9','#1976d2']}]},
+          options:{responsive:true, plugins:{legend:{display:false}}}, plugins:[valueLabelPlugin]
+        });
+      } else if (view==='cp-borrowerpct'){
+        cpChart = new Chart(ctx,{
+          type:'doughnut',
+          data:{labels:['Borrowers','Non-borrowers'], datasets:[{data:[
+            creditPenetration.borrowers,
+            creditPenetration.members - creditPenetration.borrowers
+          ], backgroundColor:['#2e7d32','#e5e7eb']}]},
+          options:{responsive:true, plugins:{legend:{position:'bottom'}}}
+        });
+      } else if (view==='cp-land'){
+        cpChart = new Chart(ctx,{
+          type:'bar',
+          data:{labels:coverage.villages, datasets:[
+            {label:'Owned (acres)', data:landVsFinanced.owned, backgroundColor:'#90caf9'},
+            {label:'KCC-financed (acres)', data:landVsFinanced.financed, backgroundColor:'#1976d2'}
+          ]},
+          options:{responsive:true, plugins:{legend:{position:'top'}}, scales:{y:{beginAtZero:true}}}, plugins:[valueLabelPlugin]
+        });
+      } else if (view==='cp-village'){
+        // Heatmap village x crop (coverage %)
+        const cells=[];
+        coverage.crops.forEach((crop,x)=>{
+          coverage.villages.forEach((village,y)=>{
+            cells.push({x,y,v:coverage.matrix[y][x]});
+          });
+        });
+        cpChart = new Chart(ctx,{
+          type:'matrix',
+          data:{datasets:[{
+            label:'Coverage %',
+            data:cells,
+            width:({chart})=>(chart.chartArea?.width||0)/(coverage.crops.length+0.2),
+            height:({chart})=>(chart.chartArea?.height||0)/(coverage.villages.length+0.2),
+            backgroundColor:c=> c.raw.v<40? '#ff8a80' : (c.raw.v<70? '#ffd54f' : '#81c784'),
+            borderColor:'#e5e7eb', borderWidth:1
+          }]},
+          options:{responsive:true, plugins:{legend:{display:false}, tooltip:{callbacks:{
+            title:it=> coverage.villages[it[0].raw.y] + ' • ' + coverage.crops[it[0].raw.x],
+            label:it=> 'Coverage: ' + it.raw.v + '%'
+          }}}, scales:{x:{type:'category',labels:coverage.crops,position:'top',grid:{display:false}}, y:{type:'category',labels:coverage.villages,grid:{display:false}}}}
+        });
+      }
     }
-  }
 
-  // ---------- LOAN PORTFOLIO tile ----------
-  let lpChart; const lpCtx=C('lpCanvas');
-  function renderLP(view='termSplit'){
-    if(lpChart) lpChart.destroy();
-    if(view==='termSplit'){
-      lpChart = new Chart(lpCtx,{type:'doughnut', data:{labels:['KCC','MT','LT'],
-        datasets:[{data:termSplit, backgroundColor:['#2e7d32','#1976d2','#6a4bc3']}]},
-        options:{responsive:true, plugins:{legend:{position:'bottom'}}}});
-    }else if(view==='seasonSplit'){
-      lpChart = new Chart(lpCtx,{type:'bar', data:{labels:seasonKCC.seasons,
-        datasets:[{label:'KCC Disbursed (₹L)', data:seasonKCC.disbursed, backgroundColor:grad(lpCtx,'#43a047','#a5d6a7')}]},
-        options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}, plugins:[labelsPlugin]});
-    }else if(view==='insurance'){
-      lpChart = new Chart(lpCtx,{type:'bar', data:{labels:insurance.crops, datasets:[{
-        label:'Coverage %', data:insurance.coveragePct,
-        backgroundColor:insurance.coveragePct.map(p=> p<70?'#ef5350':(p<90?'#ffb74d':'#66bb6a'))
-      }]}, options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}, plugins:[labelsPlugin]});
-    }else if(view==='ticketSizes'){
-      lpChart = new Chart(lpCtx,{type:'bar', data:{labels:ticketBuckets.labels,
-        datasets:[{label:'# Loans', data:ticketBuckets.counts, backgroundColor:grad(lpCtx,'#1565c0','#90caf9')}]},
-        options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}, plugins:[labelsPlugin]});
-    }else{ // endUse
-      lpChart = new Chart(lpCtx,{type:'pie', data:{labels:endUse.labels,
-        datasets:[{data:endUse.shares, backgroundColor:['#2e7d32','#009688','#ffb300','#6a4bc3','#c62828']}]},
-        options:{responsive:true, plugins:{legend:{position:'bottom'}}}});
+    function buildLoan(view){
+      const ctx = C('loanChart');
+      if (!ctx) return;
+      loanChart?.destroy();
+      if (view==='lp-term'){
+        loanChart = new Chart(ctx,{type:'doughnut', data:{labels:['KCC','MT','LT'], datasets:[{data:termSplit, backgroundColor:['#2e7d32','#1976d2','#6a4bc3']}]}, options:{plugins:{legend:{position:'bottom'}}}});
+      }else if(view==='lp-season'){
+        loanChart = new Chart(ctx,{type:'bar', data:{labels:seasonKCC.seasons, datasets:[{label:'KCC Disbursed (₹L)', data:seasonKCC.disbursed, backgroundColor:'#43a047'}]}, options:{scales:{y:{beginAtZero:true}}}, plugins:[valueLabelPlugin]});
+      }else if(view==='lp-insurance'){
+        loanChart = new Chart(ctx,{type:'bar', data:{labels:insurance.crops, datasets:[{label:'Coverage %', data:insurance.coveragePct, backgroundColor:insurance.coveragePct.map(p=>p<70?'#ef5350':(p<90?'#ffb74d':'#66bb6a'))}]}, options:{scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}, plugins:[valueLabelPlugin]});
+      }else if(view==='lp-ticket'){
+        loanChart = new Chart(ctx,{type:'bar', data:{labels:ticketBuckets.labels, datasets:[{label:'# Loans', data:ticketBuckets.counts, backgroundColor:'#1565c0'}]}, options:{scales:{y:{beginAtZero:true}}}, plugins:[valueLabelPlugin]});
+      }else if(view==='lp-enduse'){
+        loanChart = new Chart(ctx,{type:'pie', data:{labels:endUse.labels, datasets:[{data:endUse.shares, backgroundColor:['#2e7d32','#009688','#ffb300','#6a4bc3','#c62828']}]} , options:{plugins:{legend:{position:'bottom'}}}});
+      }
     }
-  }
 
-  // ---------- REPAYMENT tile ----------
-  let rpChart; const rpCtx=C('rpCanvas');
-  function renderRP(view='cohort'){
-    if(rpChart) rpChart.destroy();
-    if(view==='cohort'){
-      rpChart = new Chart(rpCtx,{type:'bar', data:{labels:cohort.labels, datasets:[
-        {label:'On-time %', data:cohort.onTime, backgroundColor:'#2e7d32', stack:'s'},
-        {label:'Delayed %', data:cohort.delayed, backgroundColor:'#ffb300', stack:'s'},
-        {label:'Default %', data:cohort.defaulted, backgroundColor:'#c62828', stack:'s'}]},
-        options:{responsive:true, plugins:{legend:{position:'top'}}, scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}, plugins:[labelsPlugin]});
-    }else if(view==='aging'){
-      rpChart = new Chart(rpCtx,{type:'bar', data:{labels:aging.labels,
-        datasets:[{label:'Amount (₹L)', data:aging.amountLakh, backgroundColor:grad(rpCtx,'#1976d2','#bbdefb')}]},
-        options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}, plugins:[labelsPlugin]});
-    }else{ // dpd + npa side-by-side bars (stacked)
-      rpChart = new Chart(rpCtx,{type:'bar', data:{labels:[...dpdBuckets.labels, ...npa.labels],
-        datasets:[{label:'₹L (DPD/NPA)', data:[...dpdBuckets.amountLakh, ...npa.amountLakh],
-        backgroundColor:(ctx)=> ctx.dataIndex<4? ['#66bb6a','#ffb74d','#fb8c00','#c62828'][ctx.dataIndex] : '#6a4bc3'}]},
-        options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}, plugins:[labelsPlugin]});
+    function buildRepay(view){
+      const ctx = C('repayChart');
+      if (!ctx) return;
+      repayChart?.destroy();
+      if (view==='rp-cohort'){
+        repayChart = new Chart(ctx,{type:'bar', data:{labels:cohort.labels, datasets:[
+          {label:'On-time %', data:cohort.onTime, backgroundColor:'#2e7d32', stack:'s'},
+          {label:'Delayed %', data:cohort.delayed, backgroundColor:'#ffb300', stack:'s'},
+          {label:'Default %', data:cohort.defaulted, backgroundColor:'#c62828', stack:'s'}
+        ]}, options:{scales:{y:{beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}}}, plugins:[valueLabelPlugin]});
+      }else if(view==='rp-aging'){
+        repayChart = new Chart(ctx,{type:'bar', data:{labels:aging.labels, datasets:[{label:'Amount (₹L)', data:aging.amountLakh, backgroundColor:'#1976d2'}]}, options:{scales:{y:{beginAtZero:true}}}, plugins:[valueLabelPlugin]});
+      }else if(view==='rp-dpd'){
+        repayChart = new Chart(ctx,{type:'bar', data:{labels:dpdBuckets.labels, datasets:[{label:'Overdue (₹L)', data:dpdBuckets.amountLakh, backgroundColor:['#66bb6a','#ffb74d','#fb8c00','#c62828']}]} , options:{scales:{y:{beginAtZero:true}}}, plugins:[valueLabelPlugin]});
+      }else if(view==='rp-npa'){
+        repayChart = new Chart(ctx,{type:'bar', data:{labels:npa.labels, datasets:[{label:'Outstanding (₹L)', data:npa.amountLakh, backgroundColor:'#6a4bc3'}]}, options:{scales:{y:{beginAtZero:true}}}, plugins:[valueLabelPlugin]});
+      }
     }
-  }
 
-  // ---------- PEER / CONCENTRATION tile ----------
-  let pbChart; const pbCtx=C('pbCanvas');
-  function renderPB(view='concentration'){
-    if(pbChart) pbChart.destroy();
-    if(view==='concentration'){
-      pbChart = new Chart(pbCtx,{type:'treemap', data:{datasets:[{
-        tree: concentration.data.map(d=>({category:d.name, value:d.share})),
-        key:'value',
-        labels:{display:true, formatter:ctx=>`${ctx.raw.category}\n${ctx.raw.value}%`},
-        backgroundColor:ctx=> ctx.raw.value>25 ? '#ef5350' : '#90caf9',
-        borderColor:'#fff', borderWidth:2, spacing:.5
-      }]}, options:{responsive:true, plugins:{legend:{display:false}}}});
-    }else{
-      pbChart = new Chart(pbCtx,{type:'bar', data:{labels:peerVillages, datasets:[
-        {label:'Avg ticket (₹k)', data:avgTicket, backgroundColor:'#1976d2'},
-        {type:'line', label:'Repayment %', data:repayPct, borderColor:'#2e7d32', pointRadius:4, tension:.35, yAxisID:'y1'}
-      ]}, options:{responsive:true, scales:{
-        y:{beginAtZero:true, title:{display:true,text:'₹ thousands'}},
-        y1:{position:'right', beginAtZero:true, grid:{drawOnChartArea:false}, ticks:{callback:v=>v+' %'}}
-      }}});
+    function buildCX(view){
+      const ctx = C('cxChart');
+      if (!ctx) return;
+      cxChart?.destroy();
+      if (view==='cx-conc'){
+        cxChart = new Chart(ctx,{type:'treemap', data:{datasets:[{
+          tree: concentration.data.map(d=>({category:d.name, value:d.share})),
+          key:'value',
+          labels:{display:true, formatter:ctx=> `${ctx.raw.category}\n${ctx.raw.value}%`},
+          backgroundColor:ctx=> ctx.raw.value>25 ? '#ef5350' : '#90caf9',
+          borderColor:'#fff', borderWidth:2, spacing:0.5
+        }]} , options:{plugins:{legend:{display:false}}}});
+      } else {
+        cxChart = new Chart(ctx,{type:'bar', data:{labels:peerVillages, datasets:[
+          {label:'Avg ticket (₹k)', data:avgTicket, backgroundColor:'#1976d2'},
+          {type:'line', label:'Repayment %', data:repayPct, borderColor:'#2e7d32', pointRadius:4, tension:.35, yAxisID:'y1'}
+        ]}, options:{scales:{y:{beginAtZero:true,title:{display:true,text:'₹ thousands'}}, y1:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},ticks:{callback:v=>v+' %'},title:{display:true,text:'Repayment %'}}}});
+      }
     }
-  }
 
-  // ---------- Tab wiring ----------
-  function initSeg(containerId, renderFn, defaultKey){
-    const box = document.getElementById(containerId);
-    box.querySelectorAll('.seg-btn').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        box.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        renderFn(btn.dataset.k);
+    /* ---------- tab wiring ---------- */
+    function wireTabs(){
+      document.querySelectorAll('.seg').forEach(seg=>{
+        seg.addEventListener('click', e=>{
+          const btn = e.target.closest('button[role="tab"]'); if(!btn) return;
+          seg.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          const target = btn.dataset.target;
+          if (target.startsWith('cp-')) buildCP(target);
+          else if (target.startsWith('lp-')) buildLoan(target);
+          else if (target.startsWith('rp-')) buildRepay(target);
+          else if (target.startsWith('cx-')) buildCX(target);
+        });
       });
-    });
-    renderFn(defaultKey); // first render
-  }
-  initSeg('cpTabs', renderCP, 'members');
-  initSeg('lpTabs', renderLP, 'termSplit');
-  initSeg('rpTabs', renderRP, 'cohort');
-  initSeg('pbTabs', renderPB, 'concentration');
+    }
 
-  // ---------- CTAs ----------
-  window.viewGapDetails = () => alert('Opens drill-down of under-financed farmers for the selected village × crop (demo).');
-  window.initiateMobilization = () => alert('Assign field officer & SMS campaign to red/amber cells (demo).');
-  window.flagDataIssue = () => alert('Flagged the cell for data correction (demo).');
-  window.recommendTopup = () => alert('Top-up recommendation generated for coverage gaps (demo).');
+    // initial views
+    buildCP('cp-members');
+    buildLoan('lp-term');
+    buildRepay('rp-cohort');
+    buildCX('cx-conc');
+    wireTabs();
 
-  window.exportCoverage = () => {
-    const rows=[['Village','Crop','Coverage %']];
-    coverage.villages.forEach((v,ri)=> coverage.crops.forEach((c,ci)=> rows.push([v,c,coverage.matrix[ri][ci]])));
-    downloadCSV('coverage_heatmap.csv',rows);
-  };
-  window.chaseUninsured = () => alert('Generated list of uninsured KCC loans (demo).');
-  window.exportInsurance = () => {
-    const rows=[['Crop','Coverage %']]; insurance.crops.forEach((c,i)=>rows.push([c,insurance.coveragePct[i]]));
-    downloadCSV('insurance_coverage.csv',rows);
-  };
-  window.sendReminders = () => alert('Reminder SMS/WA queued (demo).');
-  window.downloadDueList = () => {
-    const rows=[['Bucket','Amount (₹L)']]; aging.labels.forEach((b,i)=>rows.push([b,aging.amountLakh[i]]));
-    downloadCSV('to_be_due_aging.csv',rows);
-  };
-  window.escalate90 = () => alert('Escalation note prepared for >90 DPD (demo).');
-  window.exportDPD = () => {
-    const rows=[['Label','₹ Lakh']]; [...dpdBuckets.labels,...npa.labels].forEach((l,i)=>{
-      const v = i<dpdBuckets.labels.length ? dpdBuckets.amountLakh[i] : npa.amountLakh[i-dpdBuckets.labels.length];
-      rows.push([l,v]);
-    }); downloadCSV('dpd_npa.csv',rows);
-  };
-  window.downloadPeerLoan = () => {
-    const rows=[['Peer','Avg ticket (₹k)','Repayment %']]; peerVillages.forEach((p,i)=>rows.push([p,avgTicket[i],repayPct[i]]));
-    downloadCSV('peer_benchmarking.csv',rows);
-  };
-  window.setTargets = () => alert('Targets set for low-performing peers/villages (demo).');
-</script>
+    /* ---------- CTAs (demo) ---------- */
+    window.viewGapDetails = () => alert('Opens drill-down of underfinanced farmers by village × crop (demo).');
+    window.initiateMobilization = () => alert('Assign field officer & SMS campaign to red/amber cells (demo).');
+    window.flagDataIssue = () => alert('Flagged for data correction (demo).');
+    window.recommendTopup = () => alert('Top-up recommendation generated (demo).');
+    window.exportCoverage = () => {
+      const rows=[['Village','Crop','Coverage %']];
+      coverage.villages.forEach((v,ri)=> coverage.crops.forEach((c,ci)=> rows.push([v,c,coverage.matrix[ri][ci]])));
+      downloadCSV('coverage_heatmap.csv',rows);
+    };
+    window.chaseUninsured = () => alert('Uninsured KCC list generated (demo).');
+    window.exportInsurance = () => {
+      const rows=[['Crop','Coverage %']]; insurance.crops.forEach((c,i)=>rows.push([c,insurance.coveragePct[i]]));
+      downloadCSV('insurance_coverage.csv',rows);
+    };
+    window.sendReminders = () => alert('Reminder SMS/WA queued (demo).');
+    window.downloadDueList = () => {
+      const rows=[['Bucket','Amount (₹L)']]; aging.labels.forEach((b,i)=>rows.push([b,aging.amountLakh[i]]));
+      downloadCSV('to_be_due_aging.csv',rows);
+    };
+    window.escalate90 = () => alert('Escalation note prepared for >90 DPD (demo).');
+    window.exportDPD = () => {
+      const rows=[['DPD Bucket','Amount (₹L)']]; dpdBuckets.labels.forEach((b,i)=>rows.push([b,dpdBuckets.amountLakh[i]]));
+      downloadCSV('dpd_buckets.csv',rows);
+    };
+    window.downloadPeerLoan = () => {
+      const rows=[['Peer','Avg ticket (₹k)','Repayment %']]; peerVillages.forEach((p,i)=>rows.push([p,avgTicket[i],repayPct[i]]));
+      downloadCSV('peer_benchmarking.csv',rows);
+    };
+    window.setTargets = () => alert('Targets set for low-performing peers/villages (demo).');
+  </script>
 </body>
 </html>
