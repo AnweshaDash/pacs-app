@@ -6,10 +6,16 @@
 <title>PACS Utai – Loan Profile</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
 <link rel="stylesheet" href="styles.css"/>
+
+<!-- Chart.js core -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+<!-- Plugins used on this page -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@2.3.0"></script>
 </head>
+
 <body class="app-only app-locked">
-<!-- LOGIN OVERLAY -->
+<!-- LOGIN OVERLAY (kept as-is) -->
 <div id="loginOverlay" class="login-overlay" aria-modal="true" role="dialog">
   <div class="login-card">
     <div class="hd">
@@ -69,63 +75,148 @@
     <button class="tab" onclick="logout()">Logout</button>
   </div>
 
-  <!-- LOAN PROFILE CONTENT -->
+  <!-- ====================== LOAN PROFILE ====================== -->
   <section class="wrap">
+
+    <!-- ========== Bucket 1: Credit Penetration ========== -->
+    <h2 class="bucket">1) Credit Penetration</h2>
     <div class="grid">
-      <!-- Card 1: Utilisation -->
-      <div class="card span-6">
-        <div class="hd">Loan Utilization (Land vs KCC Covered) <span class="pill">Target ≥70%</span></div>
+      <div class="kcard span-3"><div class="ic g">👥</div><div class="kv"><div class="label">Members</div><div class="value" id="lp_members">—</div></div></div>
+      <div class="kcard span-3"><div class="ic b">💳</div><div class="kv"><div class="label">Borrowers</div><div class="value" id="lp_borrowers">—</div></div></div>
+      <div class="kcard span-3"><div class="ic a">📈</div><div class="kv"><div class="label">Borrower %</div><div class="value" id="lp_borrower_pct">—%</div></div></div>
+      <div class="kcard span-3"><div class="ic t">🌾</div><div class="kv"><div class="label">Financed land / Owned</div><div class="value" id="lp_land_ratio">—</div><div class="mini">KCC-covered acres vs owned (borrowers)</div></div></div>
+
+      <!-- Heatmap: village × crop coverage -->
+      <div class="card span-7">
+        <div class="hd">Credit Absorption & Utilization <span class="pill">Coverage % by Village × Crop</span></div>
         <div class="bd">
-          <div class="chart-wrap"><canvas id="utilChart"></canvas></div>
-          <div class="hint" style="margin-top:6px">Utilization (%) = (KCC-covered cultivable acres ÷ Total cultivable acres) × 100. Low utilization ⇒ under-financed.</div>
-          <div class="insights" id="utilInsights"></div>
+          <div class="legend-row">
+            <span class="legend-dot red"></span><span class="tiny">0–40% (Gap)</span>
+            <span class="legend-dot amber"></span><span class="tiny">40–70% (Partial)</span>
+            <span class="legend-dot green"></span><span class="tiny">70–100% (Adequate)</span>
+          </div>
+          <div class="chart-wrap"><canvas id="coverageHeatmap"></canvas></div>
           <div class="toolbar">
-            <button class="tab" onclick="findTopup()">Find top-up candidates</button>
-            <button class="tab" onclick="exportUtilization()">Download utilization CSV</button>
+            <button class="btn" onclick="viewGapDetails()">View gap details</button>
+            <button class="btn btn-blue" onclick="initiateMobilization()">Initiate mobilization</button>
+            <button class="btn btn-warn" onclick="flagDataIssue()">Flag data issue</button>
+            <button class="btn btn-outline" onclick="recommendTopup()">Top-up recommendation</button>
+            <button class="btn btn-outline" onclick="exportCoverage()">Download CSV</button>
           </div>
         </div>
       </div>
 
-      <!-- Card 2: Upcoming vs Overdue -->
-      <div class="card span-6">
-        <div class="hd">Repayment Monitoring (Upcoming vs Overdue)</div>
+      <!-- Stacked bars: land owned vs financed -->
+      <div class="card span-5">
+        <div class="hd">Borrowers – Land Owned vs Financed</div>
         <div class="bd">
-          <div class="chart-wrap"><canvas id="repayChart"></canvas></div>
-          <div class="insights" id="repayInsights"></div>
+          <div class="chart-wrap"><canvas id="landChart"></canvas></div>
+          <div class="insights" id="landInsights"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Bucket 2: Loan Portfolio ========== -->
+    <h2 class="bucket">2) Loan Portfolio</h2>
+    <div class="grid">
+      <div class="card span-4">
+        <div class="hd">Term Split – KCC / MT / LT</div>
+        <div class="bd"><div class="chart-wrap"><canvas id="termSplit"></canvas></div></div>
+      </div>
+      <div class="card span-4">
+        <div class="hd">KCC – Rabi vs Kharif</div>
+        <div class="bd"><div class="chart-wrap"><canvas id="seasonSplit"></canvas></div></div>
+      </div>
+      <div class="card span-4">
+        <div class="hd">KCC – Insurance Coverage</div>
+        <div class="bd">
+          <div class="chart-wrap"><canvas id="insuranceChart"></canvas></div>
           <div class="toolbar">
-            <button class="tab" onclick="sendReminders()">Send reminders</button>
-            <button class="tab" onclick="downloadDueList()">Download due list</button>
-            <button class="tab" style="color:#c62828" onclick="escalate90()">Escalate &gt;90 DPD</button>
+            <button class="btn" onclick="chaseUninsured()">Chase uninsured</button>
+            <button class="btn btn-outline" onclick="exportInsurance()">Download CSV</button>
           </div>
         </div>
       </div>
 
-      <!-- Card 3: DPD by village -->
       <div class="card span-6">
-        <div class="hd">Overdue & DPD Monitoring <span class="pill">DPD = Days Past Due</span></div>
+        <div class="hd">KCC – Ticket Sizes</div>
+        <div class="bd"><div class="chart-wrap"><canvas id="ticketChart"></canvas></div>
+          <div class="insights">Buckets: &lt;50k, 50k–1L, 1–2L, 2–3L, 3L+ (₹).</div>
+        </div>
+      </div>
+
+      <div class="card span-6">
+        <div class="hd">KCC – End Use</div>
+        <div class="bd"><div class="chart-wrap"><canvas id="endUseChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- ========== Bucket 3: Repayment Related ========== -->
+    <h2 class="bucket">3) Repayment Related</h2>
+    <div class="grid">
+      <div class="card span-6">
+        <div class="hd">Repayment – Past Cohorts (Rabi & Kharif)</div>
         <div class="bd">
-          <div class="chart-wrap"><canvas id="dpdVillageChart"></canvas></div>
-          <div class="insights" id="dpdInsights"></div>
+          <div class="chart-wrap"><canvas id="cohortRepay"></canvas></div>
+          <div class="insights">On-time / Delayed / Defaulted by season-year cohort at harvest/12-month mark.</div>
+        </div>
+      </div>
+
+      <div class="card span-6">
+        <div class="hd">Current Cycle – To-be-Due Aging</div>
+        <div class="bd">
+          <div class="chart-wrap"><canvas id="agingChart"></canvas></div>
+          <div class="insights">Upcoming: &lt;15d • 15–30d • 30–60d • 60+d (₹).</div>
           <div class="toolbar">
-            <button class="tab" onclick="sendRepaymentNudges()">Send repayment nudges</button>
-            <button class="tab" onclick="exportOverdue()">Export overdue CSV</button>
+            <button class="btn" onclick="sendReminders()">Send reminders</button>
+            <button class="btn btn-outline" onclick="downloadDueList()">Download due list</button>
           </div>
         </div>
       </div>
 
-      <!-- Card 4: Peer benchmarking -->
       <div class="card span-6">
-        <div class="hd">Peer Benchmarking (Branches / Villages)</div>
+        <div class="hd">Current Cycle – DPD Buckets</div>
+        <div class="bd">
+          <div class="chart-wrap"><canvas id="dpdBucketsChart"></canvas></div>
+          <div class="toolbar">
+            <button class="btn btn-warn" onclick="escalate90()">Escalate &gt;90 DPD</button>
+            <button class="btn btn-outline" onclick="exportDPD()">Export DPD CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card span-6">
+        <div class="hd">Regulatory NPA Nomenclature</div>
+        <div class="bd">
+          <div class="chart-wrap"><canvas id="npaChart"></canvas></div>
+          <div class="insights">SMA-0, SMA-1, SMA-2, NPA-Substandard, Doubtful, Loss.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Other relevant aspect ========== -->
+    <h2 class="bucket">4) Concentration & Peer</h2>
+    <div class="grid">
+      <div class="card span-6">
+        <div class="hd">Concentration – Crop/Village</div>
+        <div class="bd">
+          <div class="chart-wrap"><canvas id="concentrationTreemap"></canvas></div>
+          <div class="insights">Red tiles exceed 25% threshold. Download list to target diversification.</div>
+        </div>
+      </div>
+
+      <div class="card span-6">
+        <div class="hd">Peer Benchmarking (Avg Ticket & Repayment)</div>
         <div class="bd">
           <div class="chart-wrap"><canvas id="peerLoanChart"></canvas></div>
-          <div class="insights" id="peerLoanInsights"></div>
           <div class="toolbar">
-            <button class="tab" onclick="downloadPeerLoan()">Download benchmarking report</button>
-            <button class="tab" onclick="setTargets()">Set improvement targets</button>
+            <button class="btn btn-outline" onclick="downloadPeerLoan()">Download benchmarking report</button>
+            <button class="btn" onclick="setTargets()">Set improvement targets</button>
           </div>
         </div>
       </div>
     </div>
+
   </section>
 </div>
 
@@ -133,26 +224,23 @@
 <script src="app.js"></script>
 <script src="data.js"></script>
 <script>
-  // lock/unlock
+  /* ------ Lock/Unlock (uses your existing app.js helpers) ------ */
   ensureAuth();
 
-  // helpers
-  const ctx = id => document.getElementById(id)?.getContext('2d');
+  /* ------ Local helpers ------ */
+  const C = (id)=>document.getElementById(id)?.getContext('2d');
   const fmt = n => Number(n).toLocaleString('en-IN');
 
-  // small value-label plugin
+  // value labels
   const valueLabelPlugin = {
     id:'valabel',
     afterDatasetsDraw(chart){
       const {ctx} = chart; ctx.save();
-      chart.data.datasets.forEach((ds, dsi)=>{
-        const meta = chart.getDatasetMeta(dsi);
+      chart.data.datasets.forEach((ds,dsi)=>{
+        const meta=chart.getDatasetMeta(dsi);
         (meta?.data||[]).forEach((el,i)=>{
-          const v = ds.data[i]; if(v==null) return;
-          const {x,y}=el.tooltipPosition();
-          ctx.font = '12px Inter, Arial';
-          ctx.fillStyle = '#374151';
-          ctx.textAlign='center';
+          const v=ds.data[i]; if(v==null) return;
+          const {x,y}=el.tooltipPosition(); ctx.fillStyle='#374151'; ctx.font='12px Inter,Arial'; ctx.textAlign='center';
           ctx.fillText(String(v), x, y-6);
         });
       });
@@ -160,67 +248,198 @@
     }
   };
 
-  /* --------- Charts --------- */
+  /* ------ KPIs ------ */
+  document.getElementById('lp_members').textContent   = fmt(creditPenetration.members);
+  document.getElementById('lp_borrowers').textContent = fmt(creditPenetration.borrowers);
+  document.getElementById('lp_borrower_pct').textContent = Math.round(creditPenetration.borrowers/creditPenetration.members*100)+'%';
+  document.getElementById('lp_land_ratio').textContent   = Math.round(creditPenetration.landFinanced/creditPenetration.landOwned*100)+'%';
 
-  // 1) Utilisation
-  if (ctx('utilChart')) {
-    const utilChart = new Chart(ctx('utilChart'), {
-      type:'bar',
+  /* ------ Charts ------ */
+
+  // 1a) Heatmap Coverage (Village × Crop)
+  if (C('coverageHeatmap')) {
+    const cells = [];
+    coverage.crops.forEach((crop, x)=>{
+      coverage.villages.forEach((village, y)=>{
+        const pct = coverage.matrix[y][x]; // row=vil, col=crop
+        cells.push({x,y,v:pct});
+      });
+    });
+
+    new Chart(C('coverageHeatmap'),{
+      type:'matrix',
       data:{
-        labels: utilRaw.labels,
-        datasets:[
-          {type:'bar', label:'Utilization %', data: utilizationPct, backgroundColor:'#1976d2', order:2},
-          {type:'line', label:'Target (≥70%)', data: utilizationPct.map(()=>70), borderColor:'#ffb300', borderDash:[6,6], borderWidth:2, pointRadius:0, tension:0, order:1}
-        ]
+        datasets:[{
+          label:'Coverage %',
+          data: cells,
+          width: ({chart}) => (chart.chartArea?.width || 0) / (coverage.crops.length+0.2),
+          height:({chart}) => (chart.chartArea?.height|| 0) / (coverage.villages.length+0.2),
+          backgroundColor: ctx => {
+            const v = ctx.raw.v;
+            if (v<40) return '#ff8a80';
+            if (v<70) return '#ffd54f';
+            return '#81c784';
+          },
+          borderWidth:1, borderColor:'#e5e7eb'
+        }]
       },
-      options:{responsive:true, plugins:{legend:{position:'top'}}, scales:{y:{beginAtZero:true, max:100, ticks:{callback:v=>v+'%'}}}},
-      plugins:[valueLabelPlugin]
+      options:{
+        responsive:true,
+        plugins:{legend:{display:false}, tooltip:{callbacks:{title:(items)=> {
+          const {x,y} = items[0].raw;
+          return coverage.villages[y]+' • '+coverage.crops[x];
+        }, label:(item)=> 'Coverage: '+item.raw.v+'%'}}},
+        scales:{
+          x:{type:'category', labels:coverage.crops, position:'top', grid:{display:false}},
+          y:{type:'category', labels:coverage.villages, offset:true, grid:{display:false, drawBorder:false}}
+        }
+      }
     });
-    const under = utilRaw.labels.filter((l,i)=> utilizationPct[i] < 70);
-    document.getElementById('utilInsights').innerHTML =
-      `• Under target in: <b>${under.join(', ') || '—'}</b>. Prioritise top-ups and re-check non-financeable land tags.`;
   }
 
-  // 2) Repayment monitoring
-  if (ctx('repayChart')) {
-    new Chart(ctx('repayChart'),{
+  // 1b) Land owned vs financed
+  if (C('landChart')) {
+    new Chart(C('landChart'),{
       type:'bar',
-      data:{labels:repayment.months, datasets:[
-        {label:'Upcoming dues (members)', data:repayment.upcoming, backgroundColor:'#43a047'},
-        {label:'Overdue (members)', data:repayment.overdue, backgroundColor:'#c62828'}
-      ]},
-      options:{responsive:true, plugins:{legend:{position:'top'}}},
-      plugins:[valueLabelPlugin]
-    });
-    const hot = repayment.months[repayment.overdue.indexOf(Math.max(...repayment.overdue))];
-    document.getElementById('repayInsights').innerHTML =
-      `• Peak overdue expected in <b>${hot}</b>. Queue nudges first for that cohort.`;
-  }
-
-  // 3) DPD by village
-  if (ctx('dpdVillageChart')) {
-    new Chart(ctx('dpdVillageChart'),{
-      type:'bar',
-      data:{labels:dpdByVillage.labels, datasets:[
-        {label:'>30 DPD (members)', data:dpdByVillage.d30, backgroundColor:'#66bb6a'},
-        {label:'>60 DPD (members)', data:dpdByVillage.d60, backgroundColor:'#ffb300'},
-        {label:'>90 DPD (members)', data:dpdByVillage.d90, backgroundColor:'#c62828'}
+      data:{labels:coverage.villages, datasets:[
+        {label:'Owned (acres)',   data: landVsFinanced.owned,   backgroundColor:'#90caf9'},
+        {label:'KCC-financed (acres)', data: landVsFinanced.financed, backgroundColor:'#1976d2'}
       ]},
       options:{responsive:true, plugins:{legend:{position:'top'}}, scales:{y:{beginAtZero:true}}},
       plugins:[valueLabelPlugin]
     });
-    const worst = dpdByVillage.labels
-      .map((v,i)=>({v, score: dpdByVillage.d90[i]*2 + dpdByVillage.d60[i]}))
-      .sort((a,b)=>b.score-a.score)
-      .map(w=>w.v)
-      .join(' → ');
-    document.getElementById('dpdInsights').innerHTML =
-      `• Chronic overdue focus order: <b>${worst}</b>. Escalate >90 first, then 60.`;
+    const gaps = coverage.villages
+      .map((v,i)=>({v, gap: Math.max(0,landVsFinanced.owned[i]-landVsFinanced.financed[i])}))
+      .sort((a,b)=>b.gap-a.gap);
+    document.getElementById('landInsights').innerHTML =
+      `• Largest acreage gap in <b>${gaps[0].v}</b> (≈ ${fmt(gaps[0].gap)} acres). Prioritise top-up drives.`;
   }
 
-  // 4) Peer benchmarking
-  if (ctx('peerLoanChart')) {
-    new Chart(ctx('peerLoanChart'),{
+  // 2a) Term split
+  if (C('termSplit')) {
+    new Chart(C('termSplit'),{
+      type:'doughnut',
+      data:{labels:['KCC','MT','LT'], datasets:[{data:termSplit, backgroundColor:['#2e7d32','#1976d2','#6a4bc3']}]},
+      options:{responsive:true, plugins:{legend:{position:'bottom'}}}
+    });
+  }
+
+  // 2b) Kharif vs Rabi
+  if (C('seasonSplit')) {
+    new Chart(C('seasonSplit'),{
+      type:'bar',
+      data:{labels:seasonKCC.seasons, datasets:[
+        {label:'KCC Disbursed (₹L)', data:seasonKCC.disbursed, backgroundColor:'#43a047'}
+      ]},
+      options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}},
+      plugins:[valueLabelPlugin]
+    });
+  }
+
+  // 2c) Insurance coverage
+  if (C('insuranceChart')) {
+    new Chart(C('insuranceChart'),{
+      type:'bar',
+      data:{labels:insurance.crops, datasets:[
+        {label:'Coverage %', data:insurance.coveragePct, backgroundColor: insurance.coveragePct.map(p=> p<70?'#ef5350':(p<90?'#ffb74d':'#66bb6a'))}
+      ]},
+      options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true, max:100, ticks:{callback:v=>v+'%'}}}},
+      plugins:[valueLabelPlugin]
+    });
+  }
+
+  // 2d) Ticket sizes
+  if (C('ticketChart')) {
+    new Chart(C('ticketChart'),{
+      type:'bar',
+      data:{labels:ticketBuckets.labels, datasets:[
+        {label:'# Loans', data:ticketBuckets.counts, backgroundColor:'#1565c0'}
+      ]},
+      options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}},
+      plugins:[valueLabelPlugin]
+    });
+  }
+
+  // 2e) End use split
+  if (C('endUseChart')) {
+    new Chart(C('endUseChart'),{
+      type:'pie',
+      data:{labels:endUse.labels, datasets:[{data:endUse.shares, backgroundColor:['#2e7d32','#009688','#ffb300','#6a4bc3','#c62828']}]},
+      options:{responsive:true, plugins:{legend:{position:'bottom'}}}
+    });
+  }
+
+  // 3a) Cohort repayment (past)
+  if (C('cohortRepay')) {
+    new Chart(C('cohortRepay'),{
+      type:'bar',
+      data:{labels:cohort.labels, datasets:[
+        {label:'On-time %', data:cohort.onTime, backgroundColor:'#2e7d32', stack:'s'},
+        {label:'Delayed %', data:cohort.delayed, backgroundColor:'#ffb300', stack:'s'},
+        {label:'Default %', data:cohort.defaulted, backgroundColor:'#c62828', stack:'s'}
+      ]},
+      options:{responsive:true, plugins:{legend:{position:'top'}}, scales:{y:{beginAtZero:true, max:100, ticks:{callback:v=>v+'%'}}}},
+      plugins:[valueLabelPlugin]
+    });
+  }
+
+  // 3b) To-be-due aging
+  if (C('agingChart')) {
+    new Chart(C('agingChart'),{
+      type:'bar',
+      data:{labels:aging.labels, datasets:[
+        {label:'Amount (₹L)', data:aging.amountLakh, backgroundColor:'#1976d2'}
+      ]},
+      options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}},
+      plugins:[valueLabelPlugin]
+    });
+  }
+
+  // 3c) DPD buckets (current)
+  if (C('dpdBucketsChart')) {
+    new Chart(C('dpdBucketsChart'),{
+      type:'bar',
+      data:{labels:dpdBuckets.labels, datasets:[
+        {label:'Overdue (₹L)', data:dpdBuckets.amountLakh, backgroundColor:['#66bb6a','#ffb74d','#fb8c00','#c62828']}
+      ]},
+      options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}},
+      plugins:[valueLabelPlugin]
+    });
+  }
+
+  // 3d) NPA nomenclature
+  if (C('npaChart')) {
+    new Chart(C('npaChart'),{
+      type:'bar',
+      data:{labels:npa.labels, datasets:[{label:'Outstanding (₹L)', data:npa.amountLakh, backgroundColor:'#6a4bc3'}]},
+      options:{responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}},
+      plugins:[valueLabelPlugin]
+    });
+  }
+
+  // 4a) Concentration treemap
+  if (C('concentrationTreemap')) {
+    new Chart(C('concentrationTreemap'),{
+      type:'treemap',
+      data:{
+        datasets:[{
+          tree: concentration.data.map(d=>({category:d.name, value:d.share})),
+          key:'value',
+          labels:{display:true, formatter:ctx=> `${ctx.raw.category}\n${ctx.raw.value}%`},
+          backgroundColor:(ctx)=>{
+            const s = ctx.raw.value;
+            return s>25 ? '#ef5350' : '#90caf9';
+          },
+          borderColor:'#fff', borderWidth:2, spacing:0.5
+        }]
+      },
+      options:{responsive:true, plugins:{legend:{display:false}}}
+    });
+  }
+
+  // 4b) Peer benchmarking (kept from your page, rebuilt)
+  if (C('peerLoanChart')) {
+    new Chart(C('peerLoanChart'),{
       type:'bar',
       data:{labels:peerVillages, datasets:[
         {label:'Avg ticket (₹k)', data:avgTicket, backgroundColor:'#1976d2'},
@@ -232,47 +451,50 @@
       }},
       plugins:[valueLabelPlugin]
     });
-    const best = peerVillages[repayPct.indexOf(Math.max(...repayPct))];
-    document.getElementById('peerLoanInsights').innerHTML =
-      `• Best repayment: <b>${best}</b>. Set ticket targets after stabilising collections in weaker villages.`;
   }
 
-  /* --------- Page-local actions / CSV exports --------- */
-  function downloadCSV(filename, rows){
-    const processRow = row => row.map(v => `"${(v??'').toString().replace(/"/g,'""')}"`).join(',');
-    const csv = rows.map(processRow).join('\n');
+  /* ------ Page actions & CSVs ------ */
+  const downloadCSV=(filename, rows)=>{
+    const line = r=> r.map(v=>`"${(v??'').toString().replace(/"/g,'""')}"`).join(',');
+    const csv = rows.map(line).join('\n');
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  }
-
-  // toolbar handlers (local to this page)
-  window.findTopup = () => alert('Identified under-financed cultivable land; top-up candidates queued (demo).');
-  window.exportUtilization = () => {
-    const rows=[['Village','Cultivable acres','KCC-covered acres','Utilisation %']];
-    utilRaw.labels.forEach((l,i)=>rows.push([l,utilRaw.cultivable[i],utilRaw.kccCovered[i],utilizationPct[i]]));
-    downloadCSV('utilisation.csv',rows);
+    setTimeout(()=>URL.revokeObjectURL(url), 500);
   };
-  window.sendReminders = () => alert('Reminder SMS/WA queued to members with upcoming dues (demo).');
+
+  window.viewGapDetails = () => alert('Opens drill-down of underfinanced farmers for the selected village × crop (demo).');
+  window.initiateMobilization = () => alert('Assign field officer & SMS campaign to red/amber cells (demo).');
+  window.flagDataIssue = () => alert('Flagged the cell for data correction (demo).');
+  window.recommendTopup = () => alert('Top-up recommendation generated for coverage gaps (demo).');
+
+  window.exportCoverage = () => {
+    const rows=[['Village','Crop','Coverage %']];
+    coverage.villages.forEach((v,ri)=>{
+      coverage.crops.forEach((c,ci)=> rows.push([v,c,coverage.matrix[ri][ci]]));
+    });
+    downloadCSV('coverage_heatmap.csv',rows);
+  };
+  window.chaseUninsured = () => alert('Generated list of uninsured KCC loans (demo).');
+  window.exportInsurance = () => {
+    const rows=[['Crop','Coverage %']]; insurance.crops.forEach((c,i)=>rows.push([c,insurance.coveragePct[i]]));
+    downloadCSV('insurance_coverage.csv',rows);
+  };
+  window.sendReminders = () => alert('Reminder SMS/WA queued (demo).');
   window.downloadDueList = () => {
-    const rows=[['Month','Upcoming members','Overdue members']];
-    repayment.months.forEach((m,i)=>rows.push([m,repayment.upcoming[i],repayment.overdue[i]]));
-    downloadCSV('duelist.csv',rows);
+    const rows=[['Bucket','Amount (₹L)']]; aging.labels.forEach((b,i)=>rows.push([b,aging.amountLakh[i]]));
+    downloadCSV('to_be_due_aging.csv',rows);
   };
   window.escalate90 = () => alert('Escalation note prepared for >90 DPD (demo).');
-  window.sendRepaymentNudges = () => alert('Repayment nudges sent to >30 DPD cohort (demo).');
-  window.exportOverdue = () => {
-    const rows=[['Village','>30 DPD','>60 DPD','>90 DPD']];
-    dpdByVillage.labels.forEach((l,i)=>rows.push([l,dpdByVillage.d30[i],dpdByVillage.d60[i],dpdByVillage.d90[i]]));
-    downloadCSV('overdue_by_village.csv',rows);
+  window.exportDPD = () => {
+    const rows=[['DPD Bucket','Amount (₹L)']]; dpdBuckets.labels.forEach((b,i)=>rows.push([b,dpdBuckets.amountLakh[i]]));
+    downloadCSV('dpd_buckets.csv',rows);
   };
   window.downloadPeerLoan = () => {
-    const rows=[['PACS/Village','Avg ticket (₹k)','Repayment %']];
-    peerVillages.forEach((p,i)=>rows.push([p,avgTicket[i],repayPct[i]]));
-    downloadCSV('loan_benchmarking.csv',rows);
+    const rows=[['Peer','Avg ticket (₹k)','Repayment %']]; peerVillages.forEach((p,i)=>rows.push([p,avgTicket[i],repayPct[i]]));
+    downloadCSV('peer_benchmarking.csv',rows);
   };
-  window.setTargets = () => alert('Targets set for low-performing villages with monthly review (demo).');
+  window.setTargets = () => alert('Targets set for low-performing peers/villages (demo).');
 </script>
 </body>
 </html>
