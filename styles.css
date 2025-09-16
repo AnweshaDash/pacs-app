@@ -82,3 +82,22 @@ th{background:var(--brand-100); color:var(--brand)}
 .legend-dot.amber{background:#ffd54f}
 .legend-dot.green{background:#81c784}
 
+/* segmented tab switcher inside cards */
+.seg{display:flex; gap:6px; flex-wrap:wrap}
+.seg-btn{
+  background:#fff; border:1px solid var(--stroke); color:#145a2a;
+  padding:6px 10px; font-size:12px; border-radius:999px; cursor:pointer
+}
+.seg-btn.active{background:var(--brand-100); border-color:#bcdac0; font-weight:700}
+
+/* small KPI row used in credit penetration */
+.kpi-row{display:grid; grid-template-columns:repeat(4, minmax(180px,1fr)); gap:10px; margin-bottom:8px}
+@media (max-width:900px){ .kpi-row{grid-template-columns:repeat(2,1fr)} }
+@media (max-width:600px){ .kpi-row{grid-template-columns:1fr} }
+
+/* buttons */
+.btn{background:var(--brand); color:#fff; border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer}
+.btn:hover{filter:brightness(.98)}
+.btn-outline{background:#fff; color:#145a2a; border:1px solid var(--stroke)}
+.btn-blue{background:#1976d2}
+.btn-warn{background:#c62828}
