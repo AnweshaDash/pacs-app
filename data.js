@@ -27,3 +27,86 @@ const fertSales = { Urea:[520,560,480,510,670,880,920,800,720,710,860,930],
   MOP:[140,160,150,155,170,220,260,230,200,195,230,250],
   NPK:[180,210,190,200,240,300,340,300,260,250,320,350] };
 const fertStock = { labels:['Urea','DAP','MOP','NPK'], stock:[420,250,180,220], reorder:[400,300,200,240] };
+
+/* ========== Loan Profile – Data (demo) ========== */
+
+/* Credit penetration KPIs */
+const creditPenetration = {
+  members: 2316,
+  borrowers: 2050,
+  landOwned: 6200,    // acres among borrowers
+  landFinanced: 4460  // acres KCC-financed among borrowers
+};
+
+/* Coverage heatmap (village × crop) */
+const coverage = {
+  villages: ['Utai','Bhothli','Gunderdehi','Gopalpur'],
+  crops: ['Paddy','Wheat','Maize','Vegetables'],
+  // rows = villages, cols = crops; values in %
+  matrix: [
+    [72, 64, 38, 55],
+    [81, 69, 43, 62],
+    [61, 52, 28, 49],
+    [76, 71, 45, 58]
+  ]
+};
+
+/* Land owned vs financed (borrowers only) */
+const landVsFinanced = {
+  owned:    [1800, 1500, 1600, 1300],
+  financed: [1280, 1060, 980,  840]
+};
+
+/* Term split – KCC / MT / LT (% of outstanding) */
+const termSplit = [68, 22, 10];
+
+/* KCC seasonal split (₹ lakh disbursed) */
+const seasonKCC = { seasons: ['Kharif','Rabi'], disbursed: [145, 128] };
+
+/* Insurance coverage by crop (%) */
+const insurance = { crops: ['Paddy','Wheat','Maize','Vegetables'], coveragePct: [78, 92, 63, 70] };
+
+/* Ticket size buckets (# loans) */
+const ticketBuckets = {
+  labels: ['<50k','50k–1L','1–2L','2–3L','3L+'],
+  counts: [220, 540, 430, 190, 70]
+};
+
+/* End use split (% share of KCC amount) */
+const endUse = { labels: ['Agri','Dairy','Fisheries','Animal Husbandry','Others'], shares: [62, 12, 6, 14, 6] };
+
+/* Past cohorts (season-year) – percentages */
+const cohort = {
+  labels: ['Kharif 2022', 'Rabi 2022', 'Kharif 2023', 'Rabi 2023'],
+  onTime:   [73, 92, 78, 88],
+  delayed:  [18, 6,  15, 9],
+  defaulted:[9,  2,  7,  3]
+};
+
+/* Current cycle – to-be-due aging (₹ lakh) */
+const aging = { labels: ['<15d','15–30d','30–60d','60+d'], amountLakh: [9.5, 8.2, 6.7, 3.1] };
+
+/* Current cycle – DPD buckets (₹ lakh) */
+const dpdBuckets = { labels: ['1–30','31–60','61–90','>90'], amountLakh: [12.4, 6.1, 3.7, 1.8] };
+
+/* Regulatory nomenclature (₹ lakh outstanding) */
+const npa = {
+  labels: ['SMA-0','SMA-1','SMA-2','NPA-Substandard','NPA-Doubtful','NPA-Loss'],
+  amountLakh: [14.8, 6.2, 3.9, 1.7, 0.6, 0.2]
+};
+
+/* Concentration by crop or village (share %) – used in treemap */
+const concentration = {
+  data: [
+    { name:'Paddy',  share:42 },
+    { name:'Wheat',  share:18 },
+    { name:'Maize',  share:12 },
+    { name:'Veg',    share:10 },
+    { name:'Others', share:18 }
+  ]
+};
+
+/* (Already existed in your project) — peers */
+const peerVillages = ['Utai','Dhaba','Surgi','Somni','Karanja Bhillai','Nankatthi'];
+const avgTicket = [72,80,66,61,78,59]; // ₹k
+const repayPct  = [86,92,78,74,89,71];
