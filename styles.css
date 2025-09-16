@@ -67,3 +67,18 @@ th{background:var(--brand-100); color:var(--brand)}
 
 /* --- loan page niceties --- */
 .toolbar { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+/* --- Loan page bucket headings --- */
+.bucket{
+  margin:16px 4px 10px;
+  color:var(--brand);
+  font-weight:800;
+  font-size:18px;
+}
+
+/* Small legend dots for heatmap */
+.legend-row{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+.legend-dot{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--stroke)}
+.legend-dot.red{background:#ff8a80}
+.legend-dot.amber{background:#ffd54f}
+.legend-dot.green{background:#81c784}
+
