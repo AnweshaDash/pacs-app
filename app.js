@@ -58,3 +58,14 @@ function downloadMembersCSV(memberwise=false){
   villages.forEach((v,i)=>rows.push([v, borrowData.borrowers[i], borrowData.nonBorrowers[i]]));
   downloadCSV(memberwise ? 'members_memberwise.csv' : 'members.csv', rows);
 }
+
+// (Optional) expose a global CSV helper for all pages
+window.downloadCSV = function(filename, rows){
+  const line = r=> r.map(v=>`"${(v??'').toString().replace(/"/g,'""')}"`).join(',');
+  const csv = rows.map(line).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 500);
+};
+
